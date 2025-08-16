@@ -1,0 +1,190 @@
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enum para categorias
+enum Categoria {
+  BOLO_ANIVERSARIO
+  BOLO_TACA
+  BOLO_CASEIRO
+  DOCINHOS
+  SOBREMESAS
+}
+
+// Enum para massas de bolo
+enum MassaBolo {
+  RED_VELVET
+  BRANCA
+  CHOCOLATE
+  CENOURA
+  MILHO
+  FUBA
+  LIMAO
+  FORMIGUEIRO
+  LARANJA
+  IOGURTE
+}
+
+// Tabela principal de produtos
+model Produto {
+  id          Int       @id @default(autoincrement())
+  nome        String
+  descricao   String?
+  categoria   Categoria
+  preco       Float?    // Para produtos com preço fixo (sobremesas)
+  ativo       Boolean   @default(true)
+  imagem      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relacionamentos
+  tamanhos    ProdutoTamanho[]
+  recheios    ProdutoRecheio[]
+  coberturas  ProdutoCobertura[]
+  decoracoes  ProdutoDecoracao[]
+  itensCarrinho ItemCarrinho[]
+
+  @@map("produtos")
+}
+
+// Tamanhos para bolos
+model ProdutoTamanho {
+  id        Int    @id @default(autoincrement())
+  produtoId Int
+  tamanho   String // "1KG", "2KG", "15CM", "20CM", "25CM", "50UN", "100UN"
+  preco     Float
+  fatias    Int?   // quantidade de fatias que rende
+  
+  produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  @@map("produto_tamanhos")
+}
+
+// Recheios disponíveis
+model Recheio {
+  id        Int    @id @default(autoincrement())
+  nome      String @unique
+  precoExtra Float @default(0) // Para recheios premium como Nutella
+  ativo     Boolean @default(true)
+
+  produtoRecheios ProdutoRecheio[]
+
+  @@map("recheios")
+}
+
+// Relação produto-recheio (quais recheios cada produto pode ter)
+model ProdutoRecheio {
+  id        Int @id @default(autoincrement())
+  produtoId Int
+  recheioId Int
+
+  produto Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  recheio Recheio @relation(fields: [recheioId], references: [id], onDelete: Cascade)
+
+  @@unique([produtoId, recheioId])
+  @@map("produto_recheios")
+}
+
+// Coberturas disponíveis
+model Cobertura {
+  id        Int    @id @default(autoincrement())
+  nome      String @unique
+  precoExtra Float @default(0)
+  ativo     Boolean @default(true)
+
+  produtoCoberturas ProdutoCobertura[]
+
+  @@map("coberturas")
+}
+
+// Relação produto-cobertura
+model ProdutoCobertura {
+  id          Int @id @default(autoincrement())
+  produtoId   Int
+  coberturaId Int
+
+  produto   Produto   @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  cobertura Cobertura @relation(fields: [coberturaId], references: [id], onDelete: Cascade)
+
+  @@unique([produtoId, coberturaId])
+  @@map("produto_coberturas")
+}
+
+// Decorações disponíveis
+model Decoracao {
+  id        Int    @id @default(autoincrement())
+  nome      String @unique
+  preco     Float
+  ativo     Boolean @default(true)
+
+  produtoDecoracoes ProdutoDecoracao[]
+
+  @@map("decoracoes")
+}
+
+// Relação produto-decoração
+model ProdutoDecoracao {
+  id          Int @id @default(autoincrement())
+  produtoId   Int
+  decoracaoId Int
+
+  produto   Produto   @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  decoracao Decoracao @relation(fields: [decoracaoId], references: [id], onDelete: Cascade)
+
+  @@unique([produtoId, decoracaoId])
+  @@map("produto_decoracoes")
+}
+
+// Carrinho de compras
+model Carrinho {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  itens ItemCarrinho[]
+
+  @@map("carrinhos")
+}
+
+// Itens do carrinho
+model ItemCarrinho {
+  id         Int    @id @default(autoincrement())
+  carrinhoId String
+  produtoId  Int
+  quantidade Int    @default(1)
+  tamanho    String? // Tamanho selecionado
+  preco      Float   // Preço final calculado
+  
+  // Personalizações do bolo
+  recheios   String[] // Array de IDs dos recheios selecionados
+  cobertura  String?  // ID da cobertura selecionada
+  decoracoes String[] // Array de IDs das decorações
+
+  carrinho Carrinho @relation(fields: [carrinhoId], references: [id], onDelete: Cascade)
+  produto  Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+
+  @@map("itens_carrinho")
+}
+
+// Pedidos (para futuras implementações)
+model Pedido {
+  id          Int      @id @default(autoincrement())
+  nomeCliente String
+  telefone    String
+  endereco    String?
+  formaPagamento String
+  valorTotal  Float
+  status      String   @default("pendente")
+  itens       Json     // JSON com os itens do pedido
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("pedidos")
+}
