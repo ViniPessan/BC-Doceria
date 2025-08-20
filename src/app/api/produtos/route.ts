@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Categoria } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -9,13 +9,18 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const categoria = searchParams.get('categoria') // ?categoria=BOLO_ANIVERSARIO
 
+    // Validar se a categoria existe no enum
+    const whereClause = categoria && Object.values(Categoria).includes(categoria as Categoria)
+      ? {
+          categoria: categoria as Categoria,
+          ativo: true
+        }
+      : {
+          ativo: true
+        }
+
     const produtos = await prisma.produto.findMany({
-      where: categoria ? {
-        categoria: categoria as any,
-        ativo: true
-      } : {
-        ativo: true
-      },
+      where: whereClause,
       include: {
         tamanhos: true,
         recheios: {
@@ -39,6 +44,9 @@ export async function GET(request: Request) {
       }
     })
 
+    console.log(`Buscando produtos com categoria: ${categoria}`)
+    console.log(`Produtos encontrados: ${produtos.length}`)
+    
     return NextResponse.json(produtos)
   } catch (error) {
     console.error('Erro ao buscar produtos:', error)

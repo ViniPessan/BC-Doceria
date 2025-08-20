@@ -71,7 +71,7 @@ async function main() {
       nome: 'Bolo de Aniversário',
       descricao: 'Bolo personalizado com 2 recheios à sua escolha e 1 cobertura',
       categoria: 'BOLO_ANIVERSARIO',
-      imagem:"uploads/aniversario.jpg",
+      imagem: "/uploads/aniversario.jpg", // Caminho correto para Next.js
       ativo: true,
     }
   })
@@ -91,7 +91,7 @@ async function main() {
       nome: 'Bolo na Taça',
       descricao: 'Delicioso bolo servido na taça com 2 recheios e 1 cobertura',
       categoria: 'BOLO_TACA',
-      imagem:"uploads/taca.jpg",
+      imagem: "/uploads/taca.jpg", // Caminho correto para Next.js
       ativo: true,
     }
   })
@@ -109,7 +109,7 @@ async function main() {
       nome: 'Bolo Caseiro',
       descricao: 'Bolo tradicional caseiro com sabores clássicos',
       categoria: 'BOLO_CASEIRO',
-      imagem:"uploads/caseiro.jpg",
+      imagem: "/uploads/caseiro.jpg", // Caminho correto para Next.js
       ativo: true,
     }
   })
@@ -128,6 +128,7 @@ async function main() {
       nome: 'Docinhos Variados',
       descricao: 'Brigadeiros, beijinhos e outras delícias',
       categoria: 'DOCINHOS',
+      imagem: "/uploads/docinhos.jpg", // Adicionar imagem para docinhos
       ativo: true,
     }
   })
@@ -141,15 +142,15 @@ async function main() {
 
   // SOBREMESAS
   const sobremesas = [
-    { nome: 'Banoffee', preco: 60 },
-    { nome: 'Torta de Limão', preco: 60 },
-    { nome: 'Gelado de Abacaxi', preco: 70 },
-    { nome: 'Maracujá Trufado', preco: 80 },
-    { nome: 'Bombom de Morango', preco: 80 },
-    { nome: 'Bombom de Uva', preco: 80 },
-    { nome: 'Manjar', preco: 80 },
-    { nome: 'Pavê', preco: 80 },
-    { nome: 'Merengue', preco: 60 },
+    { nome: 'Banoffee', preco: 60, imagem: '/uploads/sobremesas/banoffee.jpg' },
+    { nome: 'Torta de Limão', preco: 60, imagem: '/uploads/sobremesas/torta-limao.jpg' },
+    { nome: 'Gelado de Abacaxi', preco: 70, imagem: '/uploads/sobremesas/gelado-abacaxi.jpg' },
+    { nome: 'Maracujá Trufado', preco: 80, imagem: '/uploads/sobremesas/maracuja-trufado.jpg' },
+    { nome: 'Bombom de Morango', preco: 80, imagem: '/uploads/sobremesas/bombom-morango.jpg' },
+    { nome: 'Bombom de Uva', preco: 80, imagem: '/uploads/sobremesas/bombom-uva.jpg' },
+    { nome: 'Manjar', preco: 80, imagem: '/uploads/sobremesas/manjar.jpg' },
+    { nome: 'Pavê', preco: 80, imagem: '/uploads/sobremesas/pave.jpg' },
+    { nome: 'Merengue', preco: 60, imagem: '/uploads/sobremesas/merengue.jpg' },
   ]
 
   for (const sobremesa of sobremesas) {
@@ -158,6 +159,7 @@ async function main() {
         nome: sobremesa.nome,
         categoria: 'SOBREMESAS',
         preco: sobremesa.preco,
+        imagem: sobremesa.imagem, // Adicionar imagens para sobremesas
         ativo: true,
       }
     })
