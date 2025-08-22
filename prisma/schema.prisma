@@ -1,5 +1,3 @@
-
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -49,6 +47,7 @@ model Produto {
   recheios    ProdutoRecheio[]
   coberturas  ProdutoCobertura[]
   decoracoes  ProdutoDecoracao[]
+  massas      ProdutoMassa[]        // NOVO: Relacionamento com massas
   itensCarrinho ItemCarrinho[]
 
   @@map("produtos")
@@ -58,13 +57,39 @@ model Produto {
 model ProdutoTamanho {
   id        Int    @id @default(autoincrement())
   produtoId Int
-  tamanho   String // "1KG", "2KG", "15CM", "20CM", "25CM", "50UN", "100UN"
+  tamanho   String // "1KG", "2KG", "15CM", "20CM", "25CM", "50UN", "100UN", "Sem Cobertura", "1 Cobertura", "2 Coberturas"
   preco     Float
   fatias    Int?   // quantidade de fatias que rende
   
   produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
 
   @@map("produto_tamanhos")
+}
+
+// NOVO: Massas disponíveis
+model Massa {
+  id        Int       @id @default(autoincrement())
+  nome      String    @unique
+  tipo      MassaBolo
+  precoExtra Float    @default(0)
+  ativo     Boolean   @default(true)
+
+  produtoMassas ProdutoMassa[]
+
+  @@map("massas")
+}
+
+// NOVO: Relação produto-massa (quais massas cada produto pode ter)
+model ProdutoMassa {
+  id        Int @id @default(autoincrement())
+  produtoId Int
+  massaId   Int
+
+  produto Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  massa   Massa   @relation(fields: [massaId], references: [id], onDelete: Cascade)
+
+  @@unique([produtoId, massaId])
+  @@map("produto_massas")
 }
 
 // Recheios disponíveis
@@ -153,7 +178,7 @@ model Carrinho {
   @@map("carrinhos")
 }
 
-// Itens do carrinho
+// Itens do carrinho - ATUALIZADO para incluir massa
 model ItemCarrinho {
   id         Int    @id @default(autoincrement())
   carrinhoId String
@@ -163,6 +188,7 @@ model ItemCarrinho {
   preco      Float   // Preço final calculado
   
   // Personalizações do bolo
+  massa      String?  // NOVO: ID da massa selecionada
   recheios   String[] // Array de IDs dos recheios selecionados
   cobertura  String?  // ID da cobertura selecionada
   decoracoes String[] // Array de IDs das decorações

@@ -6,6 +6,15 @@ export interface ProdutoTamanho {
   fatias: number | null;
 }
 
+// NOVO: Massa
+export interface Massa {
+  id: number;
+  nome: string;
+  tipo: string;
+  precoExtra: number;
+  ativo: boolean;
+}
+
 // Recheio
 export interface Recheio {
   id: number;
@@ -30,6 +39,12 @@ export interface Decoracao {
   ativo: boolean;
 }
 
+// NOVO: Relacionamento (produto -> massa)
+export interface ProdutoMassa {
+  id: number;
+  massa: Massa;
+}
+
 // Relacionamento (produto -> recheio)
 export interface ProdutoRecheio {
   id: number;
@@ -48,16 +63,16 @@ export interface ProdutoDecoracao {
   decoracao: Decoracao;
 }
 
+// ATUALIZADO: Seleções do produto com massa
 export interface SelecoesProduto {
   tamanhoId?: number;
+  massaId?: number;        // NOVO: ID da massa selecionada
   recheios?: number[];      
   coberturaId?: number;
-  massaId?: number;         
   decoracoes?: number[];    
 }
 
-
-// Produto principal
+// ATUALIZADO: Produto principal com massas
 export interface Produto {
   id: number;
   nome: string;
@@ -67,6 +82,7 @@ export interface Produto {
   ativo: boolean;
   imagem: string | null;
   tamanhos: ProdutoTamanho[];
+  massas: ProdutoMassa[];        // NOVO: Massas disponíveis
   recheios: ProdutoRecheio[];
   coberturas: ProdutoCobertura[];
   decoracoes?: ProdutoDecoracao[]; // Opcional pois nem todos produtos têm decorações

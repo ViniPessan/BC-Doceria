@@ -23,6 +23,11 @@ export async function GET(request: Request) {
       where: whereClause,
       include: {
         tamanhos: true,
+        massas: {              // NOVO: Incluir massas
+          include: {
+            massa: true
+          }
+        },
         recheios: {
           include: {
             recheio: true
