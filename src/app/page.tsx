@@ -1,9 +1,13 @@
-import Cup from "./components/cup/cup";
+import BirthdayCake from "./components/birthdayCake/birthdayCake";
+import CupCake from "./components/cupCake/cupCake";
+import HomeCake from "./components/homeCake/homeCake";
 
 export default function Home() {
   return (
     <div>
-      <Cup/>
+      <CupCake/>
+      <BirthdayCake/>
+      <HomeCake/>
     </div>
 
   );
