@@ -22,6 +22,14 @@ export interface Cobertura {
   ativo: boolean;
 }
 
+// Decoração
+export interface Decoracao {
+  id: number;
+  nome: string;
+  preco: number;
+  ativo: boolean;
+}
+
 // Relacionamento (produto -> recheio)
 export interface ProdutoRecheio {
   id: number;
@@ -33,6 +41,21 @@ export interface ProdutoCobertura {
   id: number;
   cobertura: Cobertura;
 }
+
+// Relacionamento (produto -> decoração)
+export interface ProdutoDecoracao {
+  id: number;
+  decoracao: Decoracao;
+}
+
+export interface SelecoesProduto {
+  tamanhoId?: number;
+  recheios?: number[];      
+  coberturaId?: number;
+  massaId?: number;         
+  decoracoes?: number[];    
+}
+
 
 // Produto principal
 export interface Produto {
@@ -46,4 +69,5 @@ export interface Produto {
   tamanhos: ProdutoTamanho[];
   recheios: ProdutoRecheio[];
   coberturas: ProdutoCobertura[];
+  decoracoes?: ProdutoDecoracao[]; // Opcional pois nem todos produtos têm decorações
 }

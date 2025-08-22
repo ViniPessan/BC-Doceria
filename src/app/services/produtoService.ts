@@ -1,4 +1,4 @@
-import { Produto } from "../types/produto";
+import { Produto } from "../../types/produto";
 
 export const fetchProdutos = async (categoria: string): Promise<Produto[]> => {
   const url = categoria? `/api/produtos?categoria=${categoria}` : '/api/produtos';
