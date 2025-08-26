@@ -47,7 +47,7 @@ model Produto {
   recheios    ProdutoRecheio[]
   coberturas  ProdutoCobertura[]
   decoracoes  ProdutoDecoracao[]
-  massas      ProdutoMassa[]        // NOVO: Relacionamento com massas
+  massas      ProdutoMassa[]
   itensCarrinho ItemCarrinho[]
 
   @@map("produtos")
@@ -66,7 +66,7 @@ model ProdutoTamanho {
   @@map("produto_tamanhos")
 }
 
-// NOVO: Massas disponíveis
+// Massas disponíveis
 model Massa {
   id        Int       @id @default(autoincrement())
   nome      String    @unique
@@ -79,7 +79,7 @@ model Massa {
   @@map("massas")
 }
 
-// NOVO: Relação produto-massa (quais massas cada produto pode ter)
+// Relação produto-massa (quais massas cada produto pode ter)
 model ProdutoMassa {
   id        Int @id @default(autoincrement())
   produtoId Int
@@ -94,10 +94,10 @@ model ProdutoMassa {
 
 // Recheios disponíveis
 model Recheio {
-  id        Int    @id @default(autoincrement())
-  nome      String @unique
-  precoExtra Float @default(0) // Para recheios premium como Nutella
+  id        Int     @id @default(autoincrement())
+  nome      String  @unique
   ativo     Boolean @default(true)
+  // ❌ REMOVIDO: precoExtra Float @default(0) 
 
   produtoRecheios ProdutoRecheio[]
 
@@ -106,9 +106,10 @@ model Recheio {
 
 // Relação produto-recheio (quais recheios cada produto pode ter)
 model ProdutoRecheio {
-  id        Int @id @default(autoincrement())
+  id        Int   @id @default(autoincrement())
   produtoId Int
   recheioId Int
+  precoExtra Float @default(0) // ✅ NOVO: preço específico por produto
 
   produto Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
   recheio Recheio @relation(fields: [recheioId], references: [id], onDelete: Cascade)
@@ -119,10 +120,10 @@ model ProdutoRecheio {
 
 // Coberturas disponíveis
 model Cobertura {
-  id        Int    @id @default(autoincrement())
-  nome      String @unique
-  precoExtra Float @default(0)
+  id        Int     @id @default(autoincrement())
+  nome      String  @unique
   ativo     Boolean @default(true)
+  // ❌ REMOVIDO: precoExtra Float @default(0)
 
   produtoCoberturas ProdutoCobertura[]
 
@@ -131,9 +132,10 @@ model Cobertura {
 
 // Relação produto-cobertura
 model ProdutoCobertura {
-  id          Int @id @default(autoincrement())
+  id          Int   @id @default(autoincrement())
   produtoId   Int
   coberturaId Int
+  precoExtra  Float @default(0) // ✅ NOVO: preço específico por produto
 
   produto   Produto   @relation(fields: [produtoId], references: [id], onDelete: Cascade)
   cobertura Cobertura @relation(fields: [coberturaId], references: [id], onDelete: Cascade)
@@ -178,7 +180,7 @@ model Carrinho {
   @@map("carrinhos")
 }
 
-// Itens do carrinho - ATUALIZADO para incluir massa
+// Itens do carrinho
 model ItemCarrinho {
   id         Int    @id @default(autoincrement())
   carrinhoId String
@@ -188,7 +190,7 @@ model ItemCarrinho {
   preco      Float   // Preço final calculado
   
   // Personalizações do bolo
-  massa      String?  // NOVO: ID da massa selecionada
+  massa      String?  // ID da massa selecionada
   recheios   String[] // Array de IDs dos recheios selecionados
   cobertura  String?  // ID da cobertura selecionada
   decoracoes String[] // Array de IDs das decorações

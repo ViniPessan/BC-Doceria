@@ -6,7 +6,7 @@ export interface ProdutoTamanho {
   fatias: number | null;
 }
 
-// NOVO: Massa
+// Massa
 export interface Massa {
   id: number;
   nome: string;
@@ -15,19 +15,17 @@ export interface Massa {
   ativo: boolean;
 }
 
-// Recheio
+// Recheio (CORRIGIDO: precoExtra não está diretamente no recheio)
 export interface Recheio {
   id: number;
   nome: string;
-  precoExtra: number;
   ativo: boolean;
 }
 
-// Cobertura
+// Cobertura (CORRIGIDO: precoExtra não está diretamente na cobertura)
 export interface Cobertura {
   id: number;
   nome: string;
-  precoExtra: number;
   ativo: boolean;
 }
 
@@ -39,40 +37,42 @@ export interface Decoracao {
   ativo: boolean;
 }
 
-// NOVO: Relacionamento (produto -> massa)
+// Relacionamento produto-massa
 export interface ProdutoMassa {
   id: number;
   massa: Massa;
 }
 
-// Relacionamento (produto -> recheio)
+// Relacionamento produto-recheio (COM precoExtra específico)
 export interface ProdutoRecheio {
   id: number;
+  precoExtra: number; // ✅ NOVO: preço específico por produto
   recheio: Recheio;
 }
 
-// Relacionamento (produto -> cobertura)
+// Relacionamento produto-cobertura (COM precoExtra específico)
 export interface ProdutoCobertura {
   id: number;
+  precoExtra: number; // ✅ NOVO: preço específico por produto
   cobertura: Cobertura;
 }
 
-// Relacionamento (produto -> decoração)
+// Relacionamento produto-decoração
 export interface ProdutoDecoracao {
   id: number;
   decoracao: Decoracao;
 }
 
-// ATUALIZADO: Seleções do produto com massa
+// Seleções do produto
 export interface SelecoesProduto {
   tamanhoId?: number;
-  massaId?: number;        // NOVO: ID da massa selecionada
+  massaId?: number;
   recheios?: number[];      
   coberturaId?: number;
   decoracoes?: number[];    
 }
 
-// ATUALIZADO: Produto principal com massas
+// Produto principal
 export interface Produto {
   id: number;
   nome: string;
@@ -82,8 +82,30 @@ export interface Produto {
   ativo: boolean;
   imagem: string | null;
   tamanhos: ProdutoTamanho[];
-  massas: ProdutoMassa[];        // NOVO: Massas disponíveis
+  massas: ProdutoMassa[];
   recheios: ProdutoRecheio[];
   coberturas: ProdutoCobertura[];
-  decoracoes?: ProdutoDecoracao[]; // Opcional pois nem todos produtos têm decorações
+  decoracoes?: ProdutoDecoracao[];
+}
+
+// ✅ NOVO: Interface para cálculo de preço
+export interface CalculoPreco {
+  precoBase: number;
+  precoMassa: number;
+  precoRecheios: number;
+  precoCobertura: number;
+  precoDecoracoes: number;
+  precoTotal: number;
+}
+
+// ✅ NOVO: Interface para item do carrinho
+export interface ItemCarrinhoData {
+  produtoId: number;
+  quantidade: number;
+  tamanho?: string;
+  massa?: string;
+  recheios: string[];
+  cobertura?: string;
+  decoracoes: string[];
+  preco: number;
 }
