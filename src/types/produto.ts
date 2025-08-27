@@ -4,6 +4,7 @@ export interface ProdutoTamanho {
   tamanho: string;
   preco: number;
   fatias: number | null;
+  maxCoberturas?: number;
 }
 
 // Massa
@@ -68,7 +69,7 @@ export interface SelecoesProduto {
   tamanhoId?: number;
   massaId?: number;
   recheios?: number[];      
-  coberturaId?: number;
+  coberturas?: number[];
   decoracoes?: number[];    
 }
 
@@ -105,7 +106,7 @@ export interface ItemCarrinhoData {
   tamanho?: string;
   massa?: string;
   recheios: string[];
-  cobertura?: string;
+  cobertura?: string[];
   decoracoes: string[];
   preco: number;
 }

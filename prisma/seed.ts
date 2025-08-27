@@ -5,7 +5,6 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Iniciando seed do banco de dados...')
 
-  // Função auxiliar para deletar com segurança
   async function safeDelete(model: any, modelName: string) {
     try {
       const result = await model.deleteMany()
@@ -19,7 +18,6 @@ async function main() {
     }
   }
 
-  // Limpar dados existentes (com segurança)
   console.log('🧹 Limpando dados existentes...')
   await safeDelete(prisma.itemCarrinho, 'ItemCarrinho')
   await safeDelete(prisma.carrinho, 'Carrinho')
@@ -34,7 +32,7 @@ async function main() {
   await safeDelete(prisma.recheio, 'Recheio')
   await safeDelete(prisma.massa, 'Massa')
 
-  // 1. INSERIR MASSAS (baseado no cardápio)
+  // 1. Massas
   console.log('🍞 Inserindo massas...')
   await prisma.massa.createMany({
     data: [
@@ -51,7 +49,7 @@ async function main() {
     ]
   })
 
-  // 2. INSERIR RECHEIOS (SEM precoExtra - será específico por produto)
+  // 2. Recheios
   console.log('📝 Inserindo recheios...')
   await prisma.recheio.createMany({
     data: [
@@ -61,7 +59,7 @@ async function main() {
       { nome: 'Brigadeiro Branco' },
       { nome: 'Mousse de Chocolate' },
       { nome: 'Brigadeiro de Nozes' },
-      { nome: 'Nutella' }, // Preço será específico por produto
+      { nome: 'Nutella' },
       { nome: 'Maracujá' },
       { nome: 'Ameixa' },
       { nome: 'Doce de Leite' },
@@ -72,35 +70,43 @@ async function main() {
     ]
   })
 
-  // 3. INSERIR COBERTURAS (SEM precoExtra - será específico por produto)
+  // 3. Coberturas
   console.log('🎂 Inserindo coberturas...')
   await prisma.cobertura.createMany({
     data: [
       { nome: 'Chantininho' },
-      { nome: 'Mousse de Chocolate' }, // Para bolo na taça
-      { nome: 'Mousse' }, // Para bolo aniversário (nome diferente conforme cardápio)
-      { nome: 'Nutella' }, // Preço será específico por produto
-      { nome: 'Ganache' }, // Preço será específico por produto
-      { nome: 'Sem Cobertura' }, // Para bolo caseiro
+      { nome: 'Mousse de Chocolate' },
+      { nome: 'Mousse' },
+      { nome: 'Nutella' },
+      { nome: 'Ganache' },
+      { nome: 'Sem Cobertura' },
+      { nome: 'Creme de Ninho' },
+      { nome: 'Morango' },
+      { nome: 'Brigadeiro Preto' },
+      { nome: 'Brigadeiro Branco' },
+      { nome: 'Brigadeiro de Limão' },
+      { nome: 'Maracujá' },
+      { nome: 'Ameixa' },
+      { nome: 'Abacaxi' },
+      { nome: 'Brigadeiro de Paçoca' },
+      { nome: 'Beijinho' },
+      { nome: 'Confeti' },
     ]
   })
 
-  // 4. INSERIR DECORAÇÕES (REMOVIDO Ganache Premium)
+  // 4. Decorações
   console.log('✨ Inserindo decorações...')
   await prisma.decoracao.createMany({
     data: [
       { nome: 'Papelaria', preco: 18 },
       { nome: 'Decoração Colorida', preco: 5 },
-      { nome: 'KitKat', preco: 32 }, // "à partir de 32"
+      { nome: 'KitKat', preco: 32 },
       { nome: 'Flor', preco: 20 },
-      // ❌ REMOVIDO: { nome: 'Ganache Premium', preco: 40 },
     ]
   })
 
-  // 5. INSERIR PRODUTOS PRINCIPAIS
+  // 5. Produtos principais
   console.log('🍰 Inserindo produtos...')
-
-  // BOLO DE ANIVERSÁRIO
   const boloAniversario = await prisma.produto.create({
     data: {
       nome: 'Bolo de Aniversário',
@@ -110,16 +116,6 @@ async function main() {
       ativo: true,
     }
   })
-
-  await prisma.produtoTamanho.createMany({
-    data: [
-      { produtoId: boloAniversario.id, tamanho: '15CM', preco: 75, fatias: 7 },
-      { produtoId: boloAniversario.id, tamanho: '20CM', preco: 150, fatias: 20 },
-      { produtoId: boloAniversario.id, tamanho: '25CM', preco: 220, fatias: 30 },
-    ]
-  })
-
-  // BOLO NA TAÇA
   const boloTaca = await prisma.produto.create({
     data: {
       nome: 'Bolo na Taça',
@@ -129,15 +125,6 @@ async function main() {
       ativo: true,
     }
   })
-
-  await prisma.produtoTamanho.createMany({
-    data: [
-      { produtoId: boloTaca.id, tamanho: '1KG', preco: 65, fatias: 10 },
-      { produtoId: boloTaca.id, tamanho: '2KG', preco: 130, fatias: 20 },
-    ]
-  })
-
-  // BOLO CASEIRO
   const boloCaseiro = await prisma.produto.create({
     data: {
       nome: 'Bolo Caseiro',
@@ -148,15 +135,23 @@ async function main() {
     }
   })
 
+  // Tamanhos
   await prisma.produtoTamanho.createMany({
     data: [
+      { produtoId: boloAniversario.id, tamanho: '15CM', preco: 75, fatias: 7 },
+      { produtoId: boloAniversario.id, tamanho: '20CM', preco: 150, fatias: 20 },
+      { produtoId: boloAniversario.id, tamanho: '25CM', preco: 220, fatias: 30 },
+
+      { produtoId: boloTaca.id, tamanho: '1KG', preco: 65, fatias: 10 },
+      { produtoId: boloTaca.id, tamanho: '2KG', preco: 130, fatias: 20 },
+
       { produtoId: boloCaseiro.id, tamanho: 'Sem Cobertura', preco: 35, fatias: 8 },
       { produtoId: boloCaseiro.id, tamanho: '1 Cobertura', preco: 40, fatias: 8 },
       { produtoId: boloCaseiro.id, tamanho: '2 Coberturas', preco: 45, fatias: 8 },
     ]
   })
 
-  // DOCINHOS
+  // Docinhos
   const docinhos = await prisma.produto.create({
     data: {
       nome: 'Docinhos Variados',
@@ -166,7 +161,6 @@ async function main() {
       ativo: true,
     }
   })
-
   await prisma.produtoTamanho.createMany({
     data: [
       { produtoId: docinhos.id, tamanho: '50UN', preco: 60, fatias: null },
@@ -174,7 +168,7 @@ async function main() {
     ]
   })
 
-  // SOBREMESAS
+  // Sobremesas
   const sobremesas = [
     { nome: 'Banoffee', preco: 60, imagem: '/uploads/sobremesas/banoffee.jpg' },
     { nome: 'Torta de Limão', preco: 60, imagem: '/uploads/sobremesas/torta-limao.jpg' },
@@ -186,7 +180,6 @@ async function main() {
     { nome: 'Pavê', preco: 80, imagem: '/uploads/sobremesas/pave.jpg' },
     { nome: 'Merengue', preco: 60, imagem: '/uploads/sobremesas/merengue.jpg' },
   ]
-
   for (const sobremesa of sobremesas) {
     await prisma.produto.create({
       data: {
@@ -199,166 +192,96 @@ async function main() {
     })
   }
 
-  // 6. RELACIONAMENTOS COM PREÇOS ESPECÍFICOS CONFORME CARDÁPIO
+  // 6. RELACIONAMENTOS COM PREÇOS ESPECÍFICOS
   console.log('🔗 Criando relacionamentos com preços específicos...')
-
-  // Buscar elementos
   const massas = await prisma.massa.findMany()
   const recheios = await prisma.recheio.findMany()
   const coberturas = await prisma.cobertura.findMany()
   const decoracoes = await prisma.decoracao.findMany()
 
-  // MASSAS - BOLO DE ANIVERSÁRIO (apenas algumas conforme cardápio)
-  const massasAniversario = massas.filter(m => 
+  // Massas
+  const massasAniversario = massas.filter(m =>
     ['RED_VELVET', 'BRANCA', 'CHOCOLATE', 'CENOURA'].includes(m.tipo)
   )
-  
   for (const massa of massasAniversario) {
-    await prisma.produtoMassa.create({
-      data: { produtoId: boloAniversario.id, massaId: massa.id }
-    })
+    await prisma.produtoMassa.create({ data: { produtoId: boloAniversario.id, massaId: massa.id } })
   }
-
-  // MASSAS - BOLO CASEIRO (todas as massas)
   for (const massa of massas) {
-    await prisma.produtoMassa.create({
-      data: { produtoId: boloCaseiro.id, massaId: massa.id }
-    })
+    await prisma.produtoMassa.create({ data: { produtoId: boloCaseiro.id, massaId: massa.id } })
   }
 
-  // RECHEIOS E COBERTURAS COM PREÇOS ESPECÍFICOS
-
-  // BOLO NA TAÇA - Recheios conforme cardápio
+  // Recheios e coberturas BOLO NA TAÇA
   const recheiosBoloTaca = [
-    { nome: 'Creme de Ninho', precoExtra: 0 },
-    { nome: 'Morango', precoExtra: 0 },
-    { nome: 'Brigadeiro Preto', precoExtra: 0 },
-    { nome: 'Brigadeiro Branco', precoExtra: 0 },
-    { nome: 'Mousse de Chocolate', precoExtra: 0 },
-    { nome: 'Brigadeiro de Nozes', precoExtra: 0 },
-    { nome: 'Nutella', precoExtra: 30 }, // +30,00 conforme cardápio
-    { nome: 'Maracujá', precoExtra: 0 },
-    { nome: 'Ameixa', precoExtra: 0 },
-    { nome: 'Doce de Leite', precoExtra: 0 },
-    { nome: 'Abacaxi', precoExtra: 0 },
-    { nome: 'Brigadeiro de Limão', precoExtra: 0 },
-    { nome: 'Brigadeiro de Paçoca', precoExtra: 0 },
-    { nome: 'Beijinho', precoExtra: 0 }
+    { nome: 'Creme de Ninho', precoExtra: 0 }, { nome: 'Morango', precoExtra: 0 }, { nome: 'Brigadeiro Preto', precoExtra: 0 },
+    { nome: 'Brigadeiro Branco', precoExtra: 0 }, { nome: 'Mousse de Chocolate', precoExtra: 0 }, { nome: 'Brigadeiro de Nozes', precoExtra: 0 },
+    { nome: 'Nutella', precoExtra: 30 }, { nome: 'Maracujá', precoExtra: 0 }, { nome: 'Ameixa', precoExtra: 0 },
+    { nome: 'Doce de Leite', precoExtra: 0 }, { nome: 'Abacaxi', precoExtra: 0 }, { nome: 'Brigadeiro de Limão', precoExtra: 0 },
+    { nome: 'Brigadeiro de Paçoca', precoExtra: 0 }, { nome: 'Beijinho', precoExtra: 0 }
   ]
-
-  for (const recheioData of recheiosBoloTaca) {
-    const recheio = recheios.find(r => r.nome === recheioData.nome)
-    if (recheio) {
-      await prisma.produtoRecheio.create({
-        data: { 
-          produtoId: boloTaca.id, 
-          recheioId: recheio.id,
-          precoExtra: recheioData.precoExtra
-        }
-      })
-    }
+  for (const r of recheiosBoloTaca) {
+    const rec = recheios.find(x => x.nome === r.nome)
+    if (rec) await prisma.produtoRecheio.create({ data: { produtoId: boloTaca.id, recheioId: rec.id, precoExtra: r.precoExtra } })
   }
-
-  // BOLO NA TAÇA - Coberturas conforme cardápio  
   const coberturasBoloTaca = [
-    { nome: 'Chantininho', precoExtra: 0 },
-    { nome: 'Mousse de Chocolate', precoExtra: 0 },
-    { nome: 'Nutella', precoExtra: 20 }, // +20,00 conforme cardápio
-    { nome: 'Ganache', precoExtra: 30 }, // +30,00 conforme cardápio
+    { nome: 'Chantininho', precoExtra: 0 }, { nome: 'Mousse de Chocolate', precoExtra: 0 },
+    { nome: 'Nutella', precoExtra: 20 }, { nome: 'Ganache', precoExtra: 30 }
   ]
-
-  for (const coberturaData of coberturasBoloTaca) {
-    const cobertura = coberturas.find(c => c.nome === coberturaData.nome)
-    if (cobertura) {
-      await prisma.produtoCobertura.create({
-        data: { 
-          produtoId: boloTaca.id, 
-          coberturaId: cobertura.id,
-          precoExtra: coberturaData.precoExtra
-        }
-      })
-    }
+  for (const c of coberturasBoloTaca) {
+    const cov = coberturas.find(x => x.nome === c.nome)
+    if (cov) await prisma.produtoCobertura.create({ data: { produtoId: boloTaca.id, coberturaId: cov.id, precoExtra: c.precoExtra } })
   }
 
-  // BOLO ANIVERSÁRIO - Recheios conforme cardápio (SEM Nutella)
+  // Recheios e coberturas BOLO ANIVERSÁRIO
   const recheiosBoloAniversario = [
+    { nome: 'Creme de Ninho', precoExtra: 0 }, { nome: 'Morango', precoExtra: 0 }, { nome: 'Brigadeiro Preto', precoExtra: 0 },
+    { nome: 'Brigadeiro Branco', precoExtra: 0 }, { nome: 'Mousse de Chocolate', precoExtra: 0 }, { nome: 'Brigadeiro de Nozes', precoExtra: 0 },
+    { nome: 'Maracujá', precoExtra: 0 }, { nome: 'Ameixa', precoExtra: 0 }, { nome: 'Doce de Leite', precoExtra: 0 },
+    { nome: 'Abacaxi', precoExtra: 0 }, { nome: 'Brigadeiro de Paçoca', precoExtra: 0 }, { nome: 'Beijinho', precoExtra: 0 }
+  ]
+  for (const r of recheiosBoloAniversario) {
+    const rec = recheios.find(x => x.nome === r.nome)
+    if (rec) await prisma.produtoRecheio.create({ data: { produtoId: boloAniversario.id, recheioId: rec.id, precoExtra: r.precoExtra } })
+  }
+  const coberturasBoloAniversario = [
+    { nome: 'Chantininho', precoExtra: 0 }, { nome: 'Mousse', precoExtra: 0 },
+    { nome: 'Nutella', precoExtra: 30 }, { nome: 'Ganache', precoExtra: 40 }
+  ]
+  for (const c of coberturasBoloAniversario) {
+    const cov = coberturas.find(x => x.nome === c.nome)
+    if (cov) await prisma.produtoCobertura.create({ data: { produtoId: boloAniversario.id, coberturaId: cov.id, precoExtra: c.precoExtra } })
+  }
+
+  // Coberturas BOLO CASEIRO
+  const coberturasBoloCaseiro = [
     { nome: 'Creme de Ninho', precoExtra: 0 },
     { nome: 'Morango', precoExtra: 0 },
     { nome: 'Brigadeiro Preto', precoExtra: 0 },
     { nome: 'Brigadeiro Branco', precoExtra: 0 },
-    { nome: 'Mousse de Chocolate', precoExtra: 0 }, // "Mousse de Choc" no cardápio
-    { nome: 'Brigadeiro de Nozes', precoExtra: 0 },
+    { nome: 'Mousse de Chocolate', precoExtra: 0 },
+    { nome: 'Brigadeiro de Limão', precoExtra: 0 },
+    { nome: 'Nutella', precoExtra: 5 },
     { nome: 'Maracujá', precoExtra: 0 },
     { nome: 'Ameixa', precoExtra: 0 },
-    { nome: 'Doce de Leite', precoExtra: 0 },
     { nome: 'Abacaxi', precoExtra: 0 },
     { nome: 'Brigadeiro de Paçoca', precoExtra: 0 },
-    { nome: 'Beijinho', precoExtra: 0 }
-    // ❌ Nutella não aparece nos recheios do bolo aniversário no cardápio
+    { nome: 'Beijinho', precoExtra: 0 },
+    { nome: 'Confeti', precoExtra: 0 },
   ]
-
-  for (const recheioData of recheiosBoloAniversario) {
-    const recheio = recheios.find(r => r.nome === recheioData.nome)
-    if (recheio) {
-      await prisma.produtoRecheio.create({
-        data: { 
-          produtoId: boloAniversario.id, 
-          recheioId: recheio.id,
-          precoExtra: recheioData.precoExtra
-        }
-      })
-    }
+  for (const c of coberturasBoloCaseiro) {
+    const cov = coberturas.find(x => x.nome === c.nome)
+    if (cov) await prisma.produtoCobertura.create({ data: { produtoId: boloCaseiro.id, coberturaId: cov.id, precoExtra: c.precoExtra } })
   }
 
-  // BOLO ANIVERSÁRIO - Coberturas conforme cardápio
-  const coberturasBoloAniversario = [
-    { nome: 'Chantininho', precoExtra: 0 },
-    { nome: 'Mousse', precoExtra: 0 }, // "Mousse" (não "Mousse de Chocolate")
-    { nome: 'Nutella', precoExtra: 30 }, // +30,00 conforme cardápio
-    { nome: 'Ganache', precoExtra: 40 }, // +40,00 conforme cardápio
-  ]
-
-  for (const coberturaData of coberturasBoloAniversario) {
-    const cobertura = coberturas.find(c => c.nome === coberturaData.nome)
-    if (cobertura) {
-      await prisma.produtoCobertura.create({
-        data: { 
-          produtoId: boloAniversario.id, 
-          coberturaId: cobertura.id,
-          precoExtra: coberturaData.precoExtra
-        }
-      })
-    }
-  }
-
-  // DECORAÇÕES - só para bolo de aniversário
-  for (const decoracao of decoracoes) {
-    await prisma.produtoDecoracao.create({
-      data: { produtoId: boloAniversario.id, decoracaoId: decoracao.id }
-    })
+  // Decorações só para bolo aniversário
+  for (const decor of decoracoes) {
+    await prisma.produtoDecoracao.create({ data: { produtoId: boloAniversario.id, decoracaoId: decor.id } })
   }
 
   console.log('✅ Seed concluído - CONFORME CARDÁPIO!')
-  console.log(`📊 Dados inseridos:`)
-  console.log(`   - ${massas.length} massas`)
-  console.log(`   - ${recheios.length} recheios`)
-  console.log(`   - ${coberturas.length} coberturas`) 
-  console.log(`   - ${decoracoes.length} decorações`)
-  console.log(`   - Produtos: Bolos e ${sobremesas.length} sobremesas`)
-  console.log('')
-  console.log('🎯 Preços específicos aplicados:')
-  console.log('   🧁 Bolo na Taça:')
-  console.log('      - Nutella recheio: +R$ 30')
-  console.log('      - Nutella cobertura: +R$ 20')
-  console.log('      - Ganache cobertura: +R$ 30')
-  console.log('   🎂 Bolo Aniversário:')
-  console.log('      - Nutella cobertura: +R$ 30 (sem Nutella nos recheios)')
-  console.log('      - Ganache cobertura: +R$ 40')
-  console.log('   ❌ Ganache Premium removido das decorações')
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error('❌ Erro no seed:', e)
     process.exit(1)
   })
