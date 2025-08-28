@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+@theme inline{
+  --font-dancing: var(--font-dancing)
+}
+
+@theme inline{
+  --font-playfair: var(--font-playfair)
+}
+
+@theme inline{
+  --font-vibes: var(--font-vibes)
+}
+
 body{
   background-color: black;
 }
+
