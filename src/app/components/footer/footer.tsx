@@ -14,7 +14,7 @@ import {
 
 export default function Footer() {
   return (
-    <footer className="relative py-8">
+    <footer className="relative py-20">
       {/* Background with overlay */}
    
       <div className="relative z-10 max-w-7xl mx-auto px-5">

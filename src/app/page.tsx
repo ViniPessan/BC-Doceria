@@ -7,7 +7,7 @@ export default function Home() {
 
   return (
     <div>
-      <h1 className="text-7xl font-vibes text-transparent bg-gradient-to-r from-pink-300 to-pink-600 bg-clip-text drop-shadow-lg text-center pt-10">Bolos</h1>
+      <h1 className="text-7xl md:text-8xl lg:text-9xl font-vibes text-transparent bg-gradient-to-r from-pink-200 via-pink-500 to-pink-700 bg-clip-text text-center pt-10 drop-shadow-[0_0_10px_#f4289157]">Bolos</h1>
       <CupCake/>
       <BirthdayCake/>
       <HomeCake/>
