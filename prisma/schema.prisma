@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enum para categorias
+// Enums
 enum Categoria {
   BOLO_ANIVERSARIO
   BOLO_TACA
@@ -16,7 +16,6 @@ enum Categoria {
   SOBREMESAS
 }
 
-// Enum para massas de bolo
 enum MassaBolo {
   RED_VELVET
   BRANCA
@@ -30,189 +29,196 @@ enum MassaBolo {
   IOGURTE
 }
 
-// Tabela principal de produtos
+enum FormaPagamento {
+  DINHEIRO
+  PIX
+  CARTAO
+}
+
+enum StatusPedido {
+  PENDENTE
+  CONFIRMADO
+  PRODUCAO
+  ENTREGUE
+  CANCELADO
+}
+
+enum TipoPedido {
+  ENTREGA
+  RETIRADA
+}
+
+// Produtos
 model Produto {
   id          Int       @id @default(autoincrement())
   nome        String
   descricao   String?
   categoria   Categoria
-  preco       Float?    // Para produtos com preço fixo (sobremesas)
+  preco       Float?    
   ativo       Boolean   @default(true)
   imagem      String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  // Relacionamentos
   tamanhos    ProdutoTamanho[]
   recheios    ProdutoRecheio[]
   coberturas  ProdutoCobertura[]
   decoracoes  ProdutoDecoracao[]
   massas      ProdutoMassa[]
   itensCarrinho ItemCarrinho[]
+  itensPedido  ItemPedido[]
 
   @@map("produtos")
 }
 
-// Tamanhos para bolos
+// Tamanhos
 model ProdutoTamanho {
   id        Int    @id @default(autoincrement())
   produtoId Int
-  tamanho   String // "1KG", "2KG", "15CM", "20CM", "25CM", "50UN", "100UN", "Sem Cobertura", "1 Cobertura", "2 Coberturas"
+  tamanho   String
   preco     Float
-  fatias    Int?   // quantidade de fatias que rende
-  
-  produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  fatias    Int?
 
+  produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
   @@map("produto_tamanhos")
 }
 
-// Massas disponíveis
+// Massas
 model Massa {
   id        Int       @id @default(autoincrement())
   nome      String    @unique
   tipo      MassaBolo
   precoExtra Float    @default(0)
   ativo     Boolean   @default(true)
-
   produtoMassas ProdutoMassa[]
-
   @@map("massas")
 }
 
-// Relação produto-massa (quais massas cada produto pode ter)
 model ProdutoMassa {
   id        Int @id @default(autoincrement())
   produtoId Int
   massaId   Int
-
-  produto Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
-  massa   Massa   @relation(fields: [massaId], references: [id], onDelete: Cascade)
-
+  produto   Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  massa     Massa   @relation(fields: [massaId], references: [id], onDelete: Cascade)
   @@unique([produtoId, massaId])
   @@map("produto_massas")
 }
 
-// Recheios disponíveis
+// Recheios
 model Recheio {
   id        Int     @id @default(autoincrement())
   nome      String  @unique
   ativo     Boolean @default(true)
-  // ❌ REMOVIDO: precoExtra Float @default(0) 
-
   produtoRecheios ProdutoRecheio[]
-
   @@map("recheios")
 }
 
-// Relação produto-recheio (quais recheios cada produto pode ter)
 model ProdutoRecheio {
   id        Int   @id @default(autoincrement())
   produtoId Int
   recheioId Int
-  precoExtra Float @default(0) // ✅ NOVO: preço específico por produto
-
+  precoExtra Float @default(0)
   produto Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
   recheio Recheio @relation(fields: [recheioId], references: [id], onDelete: Cascade)
-
   @@unique([produtoId, recheioId])
   @@map("produto_recheios")
 }
 
-// Coberturas disponíveis
+// Coberturas
 model Cobertura {
   id        Int     @id @default(autoincrement())
   nome      String  @unique
   ativo     Boolean @default(true)
-  // ❌ REMOVIDO: precoExtra Float @default(0)
-
   produtoCoberturas ProdutoCobertura[]
-
   @@map("coberturas")
 }
 
-// Relação produto-cobertura
 model ProdutoCobertura {
   id          Int   @id @default(autoincrement())
   produtoId   Int
   coberturaId Int
-  precoExtra  Float @default(0) // ✅ NOVO: preço específico por produto
-
+  precoExtra  Float @default(0)
   produto   Produto   @relation(fields: [produtoId], references: [id], onDelete: Cascade)
   cobertura Cobertura @relation(fields: [coberturaId], references: [id], onDelete: Cascade)
-
   @@unique([produtoId, coberturaId])
   @@map("produto_coberturas")
 }
 
-// Decorações disponíveis
+// Decorações
 model Decoracao {
   id        Int    @id @default(autoincrement())
   nome      String @unique
   preco     Float
   ativo     Boolean @default(true)
-
   produtoDecoracoes ProdutoDecoracao[]
-
   @@map("decoracoes")
 }
 
-// Relação produto-decoração
 model ProdutoDecoracao {
   id          Int @id @default(autoincrement())
   produtoId   Int
   decoracaoId Int
-
   produto   Produto   @relation(fields: [produtoId], references: [id], onDelete: Cascade)
   decoracao Decoracao @relation(fields: [decoracaoId], references: [id], onDelete: Cascade)
-
   @@unique([produtoId, decoracaoId])
   @@map("produto_decoracoes")
 }
 
-// Carrinho de compras
+// Carrinho
 model Carrinho {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   itens ItemCarrinho[]
-
   @@map("carrinhos")
 }
 
-// Itens do carrinho
 model ItemCarrinho {
   id         Int    @id @default(autoincrement())
   carrinhoId String
   produtoId  Int
   quantidade Int    @default(1)
-  tamanho    String? // Tamanho selecionado
-  preco      Float   // Preço final calculado
-  
-  // Personalizações do bolo
-  massa      String?  // ID da massa selecionada
-  recheios   String[] // Array de IDs dos recheios selecionados
-  cobertura  String?  // ID da cobertura selecionada
-  decoracoes String[] // Array de IDs das decorações
-
-  carrinho Carrinho @relation(fields: [carrinhoId], references: [id], onDelete: Cascade)
-  produto  Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
-
+  tamanho    String? 
+  preco      Float   
+  massa      String?  
+  recheios   String[] 
+  cobertura  String?  
+  decoracoes String[] 
+  carrinho   Carrinho @relation(fields: [carrinhoId], references: [id], onDelete: Cascade)
+  produto    Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
   @@map("itens_carrinho")
 }
 
-// Pedidos (para futuras implementações)
+// Pedidos
 model Pedido {
-  id          Int      @id @default(autoincrement())
-  nomeCliente String
-  telefone    String
-  endereco    String?
-  formaPagamento String
-  valorTotal  Float
-  status      String   @default("pendente")
-  itens       Json     // JSON com os itens do pedido
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            Int          @id @default(autoincrement())
+  nomeCliente   String
+  telefone      String
+  endereco      String?
+  tipoPedido    TipoPedido
+  formaPagamento FormaPagamento
+  valorTotal    Float
+  status        StatusPedido @default(PENDENTE)
+  observacoes   String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
+  itens ItemPedido[]
   @@map("pedidos")
+}
+
+model ItemPedido {
+  id         Int    @id @default(autoincrement())
+  pedidoId   Int
+  produtoId  Int
+  quantidade Int
+  preco      Float
+  tamanho    String?
+  massa      String?
+  recheios   String[]
+  cobertura  String?
+  decoracoes String[]
+  pedido     Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  produto    Produto @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  @@map("itens_pedido")
 }

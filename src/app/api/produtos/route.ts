@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
-import { PrismaClient, Categoria } from '@prisma/client'
+import prisma from "@/lib/prisma";
+import { Categoria } from "@prisma/client";
+import { NextResponse } from "next/server";
 
-const prisma = new PrismaClient()
 
 // GET /api/produtos - Buscar todos os produtos
 export async function GET(request: Request) {

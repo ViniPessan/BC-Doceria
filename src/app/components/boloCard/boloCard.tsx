@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Heart, Plus, Minus } from "lucide-react";
-import {
-  Produto,
-  SelecoesProduto,
-  ItemCarrinhoData
-} from "@/types/produto";
+import {Produto, SelecoesProduto, ItemCarrinhoData} from "@/types/produto";
+import { useDispatch } from 'react-redux';
+import { adicionarItem } from '@/store/slices/carrinhoSlice';
+
 
 interface BoloCardProps {
   produto: Produto;
@@ -101,26 +100,35 @@ export const BoloCard: React.FC<BoloCardProps> = ({
     setSelecoes({ ...selecoes, decoracoes: novasDecoracoes });
   }
 
-  const handleAddToCart = () => {
-    const tamanhoSelecionado = produto.tamanhos.find(t => t.id === selecoes.tamanhoId);
-    const massaSelecionada = allowMassas ? produto.massas.find(m => m.id === selecoes.massaId) : undefined;
-    const recheiosSelecionados = produto.recheios.filter(r => selecoes.recheios?.includes(r.id));
-    const coberturasSelecionadas = produto.coberturas.filter(c => selecoes.coberturas?.includes(c.id));
-    const decoracoesSelecionadas = produto.decoracoes?.filter(d => selecoes.decoracoes?.includes(d.id)) || [];
+  const dispatch = useDispatch();
 
-    const item: ItemCarrinhoData = {
-      produtoId: produto.id,
-      quantidade: quantidade,
-      tamanho: tamanhoSelecionado!.tamanho,
-      massa: massaSelecionada?.massa.nome,
-      recheios: recheiosSelecionados.map(r => r.recheio.nome),
-      cobertura: coberturasSelecionadas.map(c => c.cobertura.nome),
-      decoracoes: decoracoesSelecionadas.map(d => d.decoracao.nome),
-      preco: precoTotal
-    }
-    
-    onAddToCart(item);
-  }
+
+ const handleAddToCart = () => {
+  if (!selecoes.tamanhoId) return; // garante que o usuário selecionou um tamanho
+
+  const tamanhoSelecionado = produto.tamanhos.find(t => t.id === selecoes.tamanhoId)!;
+  const massaSelecionada = allowMassas ? produto.massas.find(m => m.id === selecoes.massaId) : undefined;
+  const recheiosSelecionados = produto.recheios.filter(r => selecoes.recheios?.includes(r.id));
+  const coberturasSelecionadas = produto.coberturas.filter(c => selecoes.coberturas?.includes(c.id));
+  const decoracoesSelecionadas = produto.decoracoes?.filter(d => selecoes.decoracoes?.includes(d.id)) || [];
+
+ const novoItem = {
+    id: Date.now(),
+    produtoId: produto.id,
+    nome: produto.nome,                // nome do produto
+    tipo: produto.categoria || 'Bolo',      // tipo do produto (se existir)
+    imagem: produto.imagem || '',      // imagem do produto
+    quantidade,
+    tamanho: tamanhoSelecionado.tamanho,
+    massa: massaSelecionada?.massa.nome,
+    recheios: recheiosSelecionados.map(r => r.recheio.nome),
+    cobertura: coberturasSelecionadas.map(c => c.cobertura.nome).join(', '),
+    decoracoes: decoracoesSelecionadas.map(d => d.decoracao.nome),
+    preco: precoTotal
+  };
+  
+  dispatch(adicionarItem(novoItem));
+};
 
   return (
     <div className="flex justify-center p-2 sm:p-4 lg:p-6">
