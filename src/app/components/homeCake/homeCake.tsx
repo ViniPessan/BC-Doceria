@@ -25,12 +25,10 @@ export const HomeCake = () => {
     console.log("Item adicionado ao carrinho:", item);
   };
 
-  // Função para definir maxCoberturas dinamicamente
   const getMaxCoberturas = () => {
     const tamanhoSelecionado = produto?.tamanhos.find(t => t.id === selecoes.tamanhoId);
     if (!tamanhoSelecionado) return 0;
 
-    // Extrai número da string, ex: "1 Cobertura" => 1, "2 Coberturas" => 2, "Sem Cobertura" => 0
     const match = tamanhoSelecionado.tamanho.match(/\d+/);
     return match ? parseInt(match[0]) : 0;
   };
