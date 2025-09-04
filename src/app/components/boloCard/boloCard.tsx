@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect } from "react";
-import { Heart, Plus, Minus } from "lucide-react";
+import { Plus, Minus } from "lucide-react";
 import {Produto, SelecoesProduto, ItemCarrinhoData} from "@/types/produto";
-import { useDispatch } from 'react-redux';
-import { adicionarItem } from '@/store/slices/carrinhoSlice';
+import { calcularPreco } from '@/utils/preco';
+import { toggleItem } from "@/utils/toggleItem";
+import { useCarrinho } from "@/hooks/addToCart";
 
 
 interface BoloCardProps {
@@ -31,103 +32,37 @@ export const BoloCard: React.FC<BoloCardProps> = ({
   const [precoTotal, setPrecoTotal] = useState<number>(produto.preco || 0);
   const [quantidade, setQuantidade] = useState<number>(1);
 
-  useEffect(() => {
-    const preco = calcularPreco();
-    setPrecoTotal(preco);
-  }, [selecoes]);
+useEffect(() => {
+  setPrecoTotal(calcularPreco(produto, selecoes, allowMassas));
+}, [selecoes])
 
-  function calcularPreco(): number {
-    const tamanho = produto.tamanhos.find(t => t.id === selecoes.tamanhoId);
-    const massa = allowMassas ? produto.massas.find(m => m.id === selecoes.massaId) : undefined;
-    const recheios = produto.recheios.filter(r => selecoes.recheios?.includes(r.id));
-    const coberturas = produto.coberturas.filter(c => selecoes.coberturas?.includes(c.id));
-    const decoracoes = produto.decoracoes?.filter(d => selecoes.decoracoes?.includes(d.id));
-
-    const precoBase = tamanho?.preco || produto.preco || 0;
-    const precoMassa = massa?.massa.precoExtra || 0;
-    const precoRecheios = recheios.reduce((acc, r) => acc + r.precoExtra, 0);
-    const precoCoberturas = coberturas.reduce((acc, c) => acc + c.precoExtra, 0);
-    const precoDecoracoes = decoracoes?.reduce((acc, d) => acc + d.decoracao.preco, 0) || 0;
-
-    return precoBase + precoMassa + precoRecheios + precoCoberturas + precoDecoracoes;
-  }
-
-  const toggleRecheio = (id: number) => {
-    const recheiosAtuais = selecoes.recheios || [];
-    const exists = recheiosAtuais.includes(id);
-    
-    let novosRecheios: number[];
-    if (exists) {
-      novosRecheios = recheiosAtuais.filter(r => r !== id);
-    } else if (recheiosAtuais.length < maxRecheios) {
-      novosRecheios = [...recheiosAtuais, id];
-    } else {
-      return;
-    }
-    
-    setSelecoes({ ...selecoes, recheios: novosRecheios });
-  }
-
-  const toggleCobertura = (id: number) => {
-    const coberturasAtuais = selecoes.coberturas || [];
-    const exists = coberturasAtuais.includes(id);
-    
-    let novasCoberturas: number[];
-    if (exists) {
-      novasCoberturas = coberturasAtuais.filter(c => c !== id);
-    } else if (coberturasAtuais.length < maxCoberturas) {
-      novasCoberturas = [...coberturasAtuais, id];
-    } else {
-      return;
-    }
-    
-    setSelecoes({ ...selecoes, coberturas: novasCoberturas });
-  }
-
-  const toggleDecoracao = (id: number) => {
-    const decoracoesAtuais = selecoes.decoracoes || [];
-    const exists = decoracoesAtuais.includes(id);
-    
-    let novasDecoracoes: number[];
-    if (exists) {
-      novasDecoracoes = decoracoesAtuais.filter(d => d !== id);
-    } else if (decoracoesAtuais.length < maxDecoracoes) {
-      novasDecoracoes = [...decoracoesAtuais, id];
-    } else {
-      return;
-    }
-    
-    setSelecoes({ ...selecoes, decoracoes: novasDecoracoes });
-  }
-
-  const dispatch = useDispatch();
-
-
- const handleAddToCart = () => {
-  if (!selecoes.tamanhoId) return; // garante que o usuário selecionou um tamanho
-
-  const tamanhoSelecionado = produto.tamanhos.find(t => t.id === selecoes.tamanhoId)!;
-  const massaSelecionada = allowMassas ? produto.massas.find(m => m.id === selecoes.massaId) : undefined;
-  const recheiosSelecionados = produto.recheios.filter(r => selecoes.recheios?.includes(r.id));
-  const coberturasSelecionadas = produto.coberturas.filter(c => selecoes.coberturas?.includes(c.id));
-  const decoracoesSelecionadas = produto.decoracoes?.filter(d => selecoes.decoracoes?.includes(d.id)) || [];
-
- const novoItem = {
-    id: Date.now(),
-    produtoId: produto.id,
-    nome: produto.nome,                // nome do produto
-    tipo: produto.categoria || 'Bolo',      // tipo do produto (se existir)
-    imagem: produto.imagem || '',      // imagem do produto
-    quantidade,
-    tamanho: tamanhoSelecionado.tamanho,
-    massa: massaSelecionada?.massa.nome,
-    recheios: recheiosSelecionados.map(r => r.recheio.nome),
-    cobertura: coberturasSelecionadas.map(c => c.cobertura.nome).join(', '),
-    decoracoes: decoracoesSelecionadas.map(d => d.decoracao.nome),
-    preco: precoTotal
-  };
   
-  dispatch(adicionarItem(novoItem));
+  const toggleRecheio = (id: number) => {
+  setSelecoes(prev => ({
+    ...prev,
+    recheios: toggleItem(id, prev.recheios, maxRecheios)
+  }));
+};
+
+const toggleCobertura = (id: number) => {
+  setSelecoes(prev => ({
+    ...prev,
+    coberturas: toggleItem(id, prev.coberturas, maxCoberturas)
+  }));
+};
+
+const toggleDecoracao = (id: number) => {
+  setSelecoes(prev => ({
+    ...prev,
+    decoracoes: toggleItem(id, prev.decoracoes, maxDecoracoes)
+  }));
+};
+
+const { addToCart } = useCarrinho();
+
+const handleAddToCart = () => {
+  if (!selecoes.tamanhoId) return;
+  addToCart(produto, selecoes, quantidade, precoTotal, allowMassas);
 };
 
   return (
@@ -150,7 +85,6 @@ export const BoloCard: React.FC<BoloCardProps> = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         </div>
 
-        {/* Conteúdo */}
         <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* Título e descrição */}
           <div className="text-center">
