@@ -16,14 +16,12 @@ export interface Massa {
   ativo: boolean;
 }
 
-// Recheio (CORRIGIDO: precoExtra não está diretamente no recheio)
 export interface Recheio {
   id: number;
   nome: string;
   ativo: boolean;
 }
 
-// Cobertura (CORRIGIDO: precoExtra não está diretamente na cobertura)
 export interface Cobertura {
   id: number;
   nome: string;
@@ -47,14 +45,14 @@ export interface ProdutoMassa {
 // Relacionamento produto-recheio (COM precoExtra específico)
 export interface ProdutoRecheio {
   id: number;
-  precoExtra: number; // ✅ NOVO: preço específico por produto
+  precoExtra: number; // 
   recheio: Recheio;
 }
 
 // Relacionamento produto-cobertura (COM precoExtra específico)
 export interface ProdutoCobertura {
   id: number;
-  precoExtra: number; // ✅ NOVO: preço específico por produto
+  precoExtra: number; // 
   cobertura: Cobertura;
 }
 
