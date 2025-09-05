@@ -14,6 +14,7 @@ export interface ItemCarrinho {
   decoracoes?: string[];
   preco: number;
 }
+
 interface CarrinhoState {
   itens: ItemCarrinho[]
 }
@@ -41,8 +42,31 @@ const carrinhoSlice = createSlice({
         state.itens[index] = action.payload
       }
     },
+
+
+    aumentarQuantidade: (state, action: PayloadAction<number>) => {
+      const item = state.itens.find(i => i.id === action.payload)
+      if (item) {
+        item.quantidade += 1
+      }
+    },
+
+    diminuirQuantidade: (state, action: PayloadAction<number>) => {
+      const item = state.itens.find(i => i.id === action.payload)
+      if (item && item.quantidade > 1) {
+        item.quantidade -= 1
+      }
+    },
   },
 })
 
-export const { adicionarItem, removerItem, limparCarrinho, atualizarItem } = carrinhoSlice.actions
+export const { 
+  adicionarItem, 
+  removerItem, 
+  limparCarrinho, 
+  atualizarItem,
+  aumentarQuantidade,
+  diminuirQuantidade
+} = carrinhoSlice.actions
+
 export default carrinhoSlice.reducer
