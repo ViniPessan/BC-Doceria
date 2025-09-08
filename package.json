@@ -12,6 +12,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@fortawesome/free-brands-svg-icons": "^7.0.1",
+    "@fortawesome/react-fontawesome": "^3.0.2",
     "@prisma/client": "^6.13.0",
     "@reduxjs/toolkit": "^2.8.2",
     "lucide-react": "^0.539.0",

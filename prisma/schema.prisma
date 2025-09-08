@@ -193,7 +193,7 @@ model ItemCarrinho {
 model Pedido {
   id            Int          @id @default(autoincrement())
   nomeCliente   String
-  telefone      String
+  telefone      String?
   endereco      String?
   tipoPedido    TipoPedido
   formaPagamento FormaPagamento

@@ -9,7 +9,10 @@ import {
   diminuirQuantidade 
 } from '@/store/slices/carrinhoSlice';
 import { useState } from 'react';
-import { Minus, Plus, Trash2, ShoppingCart, Send, MessageCircle } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
+
 
 export default function CarrinhoPage() {
   const itens = useSelector((state: RootState) => state.carrinho.itens);
@@ -61,22 +64,55 @@ export default function CarrinhoPage() {
     return !Object.values(novosErros).some(erro => erro);
   };
 
-  const handleFazerPedido = () => {
-    setTentouEnviar(true);
+const handleFazerPedido = async () => {
+  setTentouEnviar(true);
 
-    if (!validarFormulario()) {
-      // Scroll para o formulário em caso de erro
-      document.querySelector('#formulario-pedido')?.scrollIntoView({ behavior: 'smooth' });
-      return;
+  if (!validarFormulario()) {
+    document.querySelector('#formulario-pedido')?.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    // Monta o corpo do pedido para o backend
+    const body = {
+      nomeCliente: nome,
+      endereco: tipoEntrega === 'entrega' ? endereco : null,
+      tipoPedido: tipoEntrega,
+      formaPagamento: pagamento,
+      valorTotal: totalCarrinho,
+      observacoes,
+      itens: itens.map(item => ({
+        produtoId: item.id,
+        quantidade: item.quantidade,
+        preco: item.preco,
+        tamanho: item.tamanho || null,
+        massa: item.massa || null,
+        recheios: item.recheios || [],
+        cobertura: item.cobertura || null,
+        decoracoes: item.decoracoes || []
+      }))
+    };
+
+    // Salva o pedido no backend
+    const response = await fetch('/api/pedidos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!response.ok) {
+      throw new Error('Erro ao salvar o pedido no servidor');
     }
 
-    setLoading(true);
+    const pedidoSalvo = await response.json();
 
     // Monta mensagem do WhatsApp
     const mensagem = `
 🍰 *Novo Pedido BC Docearia* 🍰
 
-👤 *Nome:* ${nome}
+🙋 *Nome:* ${nome}
 💳 *Pagamento:* ${pagamento}
 🚚 *Tipo:* ${tipoEntrega === 'retirada' ? 'Retirada' : 'Entrega'}
 ${tipoEntrega === 'entrega' ? `🏠 *Endereço:* ${endereco}` : ''}
@@ -87,24 +123,33 @@ ${itens
   .map(
     item =>
       `• ${item.nome}${item.tamanho ? ` (${item.tamanho})` : ''}
-${item.massa ? `   -Massa: ${item.massa}` : ''}
-${item.recheios?.length ? `  -Recheios: ${item.recheios.join(', ')}` : ''}
-${item.cobertura ? `  -Cobertura: ${item.cobertura}` : ''}
-${item.decoracoes?.length ? `  -Decorações: ${item.decoracoes.join(', ')}` : ''}
-  -Quantidade: ${item.quantidade}x`
+${item.massa ? `   - Massa: ${item.massa}` : ''}
+${item.recheios?.length ? `   - Recheios: ${item.recheios.join(', ')}` : ''}
+${item.cobertura ? `   - Cobertura: ${item.cobertura}` : ''}
+${item.decoracoes?.length ? `   - Decorações: ${item.decoracoes.join(', ')}` : ''}
+   - Quantidade: ${item.quantidade}x`
   )
   .join('\n\n')}
 
-💰 *Total Geral: R$${totalCarrinho.toFixed(2)}*
+💵 *Total Geral: R$${totalCarrinho.toFixed(2)}*
 `;
 
     // Abre WhatsApp
-    const telefoneLoja = '5518997433503'; // Substitua pelo número real
-    const url = `https://wa.me/${telefoneLoja}?text=${encodeURIComponent(mensagem)}`;
-    window.open(url, '_blank');
+    const telefoneLoja = '5518997433503';
+    const url = `https://api.whatsapp.com/send?phone=${telefoneLoja}&text=${encodeURIComponent(mensagem.replace(/\n/g, '%0A'))}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
 
+    // Limpa o carrinho após enviar
+    dispatch(limparCarrinho());
+
+  } catch (error) {
+    console.error('Erro ao finalizar pedido:', error);
+    alert('Ocorreu um erro ao finalizar o pedido. Tente novamente.');
+  } finally {
     setLoading(false);
-  };
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-black p-4 sm:p-6">
@@ -365,7 +410,7 @@ ${item.decoracoes?.length ? `  -Decorações: ${item.decoracoes.join(', ')}` : '
               w-auto mx-auto py-2 px-1 min-[375px]:px-3 sm:p-5 rounded-xl font-bold text-sm sm:text-2xl min-[425px]:text-lg
               transition-all duration-300 hover:scale-[1.02]
               transform active:scale-[0.98] shadow-lg
-              flex items-center justify-center gap-3
+              flex items-center justify-center gap-1
               ${loading
                 ? 'bg-gray-600 cursor-not-allowed opacity-50 text-gray-300'
                 : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white hover:shadow-green-500/30 cursor-pointer'
@@ -379,8 +424,9 @@ ${item.decoracoes?.length ? `  -Decorações: ${item.decoracoes.join(', ')}` : '
               </>
             ) : (
               <>
-                Finalizar Pedido no WhatsApp
-                <MessageCircle className="w-5 h-5" />
+                Finalizar Pedido no WhatsApp 
+                <FontAwesomeIcon icon={faWhatsapp} size='lg'/>
+
               </>
             )}
           </button>

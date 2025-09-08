@@ -9,7 +9,6 @@ export async function POST(req: NextRequest) {
 
     const {
       nomeCliente,
-      telefone,
       endereco,
       tipoPedido,
       formaPagamento,
@@ -19,7 +18,7 @@ export async function POST(req: NextRequest) {
     } = body;
 
     // Validações básicas
-    if (!nomeCliente || !telefone || !tipoPedido || !formaPagamento || !valorTotal || !itens || itens.length === 0) {
+    if (!nomeCliente || !tipoPedido || !formaPagamento || !valorTotal || !itens || itens.length === 0) {
       return NextResponse.json(
         { error: "Dados obrigatórios não fornecidos" },
         { status: 400 }
@@ -30,7 +29,7 @@ export async function POST(req: NextRequest) {
     const mapFormaPagamento = (forma: string): FormaPagamento => {
       const map: Record<string, FormaPagamento> = {
         'Dinheiro': 'DINHEIRO',
-        'Pix': 'PIX', 
+        'Pix': 'PIX',
         'Cartão': 'CARTAO',
         'DINHEIRO': 'DINHEIRO',
         'PIX': 'PIX',
@@ -53,7 +52,6 @@ export async function POST(req: NextRequest) {
     const novoPedido = await prisma.pedido.create({
       data: {
         nomeCliente,
-        telefone,
         endereco: endereco || null,
         tipoPedido: mapTipoPedido(tipoPedido),
         formaPagamento: mapFormaPagamento(formaPagamento),
