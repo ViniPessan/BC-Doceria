@@ -112,7 +112,7 @@ async function main() {
       nome: 'Bolo de Aniversário',
       descricao: 'Bolo personalizado com massa à escolha, 2 recheios e 1 cobertura',
       categoria: 'BOLO_ANIVERSARIO',
-      imagem: "/uploads/aniversario.jpg",
+      imagem: "/bolos/aniversario.jpg",
       ativo: true,
     }
   })
@@ -121,7 +121,7 @@ async function main() {
       nome: 'Bolo na Taça',
       descricao: 'Delicioso bolo servido na taça com 2 recheios e 1 cobertura',
       categoria: 'BOLO_TACA',
-      imagem: "/uploads/taca.jpg",
+      imagem: "/bolos/taca.jpg",
       ativo: true,
     }
   })
@@ -130,7 +130,7 @@ async function main() {
       nome: 'Bolo Caseiro',
       descricao: 'Bolo tradicional caseiro com massa à escolha',
       categoria: 'BOLO_CASEIRO',
-      imagem: "/uploads/caseiro.jpg",
+      imagem: "/bolos/caseiro.jpg",
       ativo: true,
     }
   })
@@ -151,34 +151,52 @@ async function main() {
     ]
   })
 
-  // Docinhos
-  const docinhos = await prisma.produto.create({
-    data: {
-      nome: 'Docinhos Variados',
-      descricao: 'Brigadeiros, beijinhos e outras delícias',
-      categoria: 'DOCINHOS',
-      imagem: "/uploads/docinhos.jpg",
-      ativo: true,
-    }
-  })
-  await prisma.produtoTamanho.createMany({
-    data: [
-      { produtoId: docinhos.id, tamanho: '50UN', preco: 60, fatias: null },
-      { produtoId: docinhos.id, tamanho: '100UN', preco: 120, fatias: null },
-    ]
-  })
+  // Docinhos individuais por sabor
+  console.log('🍬 Inserindo docinhos...')
+  const docinhosSabores = [
+    { nome: 'Brigadeiro', imagem: '/docinhos/brigadeiro.jpg', precoExtra: 0 },
+    { nome: 'Ninho com Nutella', imagem: '/docinhos/ninho-nutella.jpg', precoExtra: 30 },
+    { nome: 'Beijinho', imagem: '/docinhos/beijinho.jpg', precoExtra: 0 },
+    { nome: 'Ninho', imagem: '/docinhos/ninho.jpg', precoExtra: 0 },
+    { nome: 'Brigadeiro de Paçoca', imagem: '/docinhos/brigadeiro-pacoca.jpg', precoExtra: 0 },
+    { nome: 'Brigadeiro de Churros', imagem: '/docinhos/brigadeiro-churros.jpg', precoExtra: 0 },
+    { nome: 'Brigadeiro de Morango', imagem: '/docinhos/brigadeiro-morango.webp', precoExtra: 0 },
+  ]
 
-  // Sobremesas
+  for (const docinho of docinhosSabores) {
+    const produto = await prisma.produto.create({
+      data: {
+        nome: docinho.nome,
+        categoria: 'DOCINHOS',
+        imagem: docinho.imagem,
+        ativo: true,
+      }
+    })
+    
+    // Preços: base R$60 (50UN) e R$120 (100UN) + extra fixo para Nutella
+    const preco50 = 60 + docinho.precoExtra
+    const preco100 = 120 + docinho.precoExtra // Extra fixo para ambos tamanhos
+    
+    await prisma.produtoTamanho.createMany({
+      data: [
+        { produtoId: produto.id, tamanho: '50UN', preco: preco50, fatias: null },
+        { produtoId: produto.id, tamanho: '100UN', preco: preco100, fatias: null },
+      ]
+    })
+  }
+
+  // Sobremesas - preços corrigidos
+  console.log('🧁 Inserindo sobremesas...')
   const sobremesas = [
-    { nome: 'Banoffee', preco: 60, imagem: '/uploads/sobremesas/banoffee.jpg' },
-    { nome: 'Torta de Limão', preco: 60, imagem: '/uploads/sobremesas/torta-limao.jpg' },
-    { nome: 'Gelado de Abacaxi', preco: 70, imagem: '/uploads/sobremesas/gelado-abacaxi.jpg' },
-    { nome: 'Maracujá Trufado', preco: 80, imagem: '/uploads/sobremesas/maracuja-trufado.jpg' },
-    { nome: 'Bombom de Morango', preco: 80, imagem: '/uploads/sobremesas/bombom-morango.jpg' },
-    { nome: 'Bombom de Uva', preco: 80, imagem: '/uploads/sobremesas/bombom-uva.jpg' },
-    { nome: 'Manjar', preco: 80, imagem: '/uploads/sobremesas/manjar.jpg' },
-    { nome: 'Pavê', preco: 80, imagem: '/uploads/sobremesas/pave.jpg' },
-    { nome: 'Merengue', preco: 60, imagem: '/uploads/sobremesas/merengue.jpg' },
+    { nome: 'Banoffee', preco: 60, imagem: '/sobremesas/banoffee.jpg' },
+    { nome: 'Torta de Limão', preco: 60, imagem: '/sobremesas/torta-limao.jpg' },
+    { nome: 'Gelado de Abacaxi', preco: 60, imagem: '/sobremesas/gelado-abacaxi.jpg' },
+    { nome: 'Maracujá Trufado', preco: 70, imagem: '/sobremesas/maracuja-trufado.jpg' },
+    { nome: 'Bombom de Morango', preco: 80, imagem: '/sobremesas/bombom-morango.jpeg' },
+    { nome: 'Bombom de Uva', preco: 80, imagem: '/sobremesas/bombom-uva.jpg' },
+    { nome: 'Manjar', preco: 80, imagem: '/sobremesas/manjar.jpg' },
+    { nome: 'Pavê', preco: 80, imagem: '/sobremesas/pave.jpg' },
+    { nome: 'Merengue', preco: 80, imagem: '/sobremesas/merengue.jpg' },
   ]
   for (const sobremesa of sobremesas) {
     await prisma.produto.create({

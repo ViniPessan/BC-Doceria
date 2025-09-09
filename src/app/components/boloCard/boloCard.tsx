@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Plus, Minus, ShoppingCart } from "lucide-react";
-import { Produto, SelecoesProduto, ItemCarrinhoData } from "@/types/produto";
+import { Produto, SelecoesProduto, ItemCarrinhoData } from "@/types/produto/";
 import { calcularPreco } from '@/utils/preco';
 import { toggleItem } from "@/utils/toggleItem";
 import { useCarrinho } from "@/hooks/addToCart";

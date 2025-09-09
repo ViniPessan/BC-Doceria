@@ -2,16 +2,13 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store';
-import { 
-  removerItem, 
-  limparCarrinho, 
-  aumentarQuantidade, 
-  diminuirQuantidade 
-} from '@/store/slices/carrinhoSlice';
+import { removerItem, aumentarQuantidade, diminuirQuantidade, limparCarrinho } from '@/store/slices/carrinhoSlice';
 import { useState } from 'react';
 import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
+import { usePedido } from '@/hooks/usePedido';
+
 
 
 export default function CarrinhoPage() {
@@ -23,14 +20,10 @@ export default function CarrinhoPage() {
   const [tipoEntrega, setTipoEntrega] = useState<'retirada' | 'entrega' | ''>('');
   const [endereco, setEndereco] = useState('');
   const [observacoes, setObservacoes] = useState('');
-  const [erros, setErros] = useState({
-    nome: false,
-    pagamento: false,
-    tipoEntrega: false,
-    endereco: false
-  });
-  const [loading, setLoading] = useState(false);
+  const [erros, setErros] = useState({nome: false,pagamento: false,tipoEntrega: false,endereco: false});
   const [tentouEnviar, setTentouEnviar] = useState(false);
+  const { enviarPedido, loading, erro } = usePedido();
+
 
   if (!itens || itens.length === 0) {
     return (
@@ -52,101 +45,30 @@ export default function CarrinhoPage() {
 
   const totalCarrinho = itens.reduce((acc, item) => acc + item.preco * item.quantidade, 0);
 
-  const validarFormulario = () => {
-    const novosErros = {
-      nome: !nome.trim(),
-      pagamento: !pagamento,
-      tipoEntrega: !tipoEntrega,
-      endereco: tipoEntrega === 'entrega' && !endereco.trim()
-    };
-
-    setErros(novosErros);
-    return !Object.values(novosErros).some(erro => erro);
-  };
-
-const handleFazerPedido = async () => {
+  const handleFazerPedido = async () => {
   setTentouEnviar(true);
 
-  if (!validarFormulario()) {
-    document.querySelector('#formulario-pedido')?.scrollIntoView({ behavior: 'smooth' });
-    return;
+  const novosErros = {
+    nome: !nome.trim(),
+    pagamento: !pagamento,
+    tipoEntrega: !tipoEntrega,
+    endereco: tipoEntrega === 'entrega' && !endereco.trim()
+  };
+  setErros(novosErros);
+
+  if (Object.values(novosErros).some(Boolean)) {
+    return document.querySelector('#formulario-pedido')?.scrollIntoView({ behavior: 'smooth' });
   }
 
-  setLoading(true);
+  const sucesso = await enviarPedido({ nome, tipoEntrega: tipoEntrega.toUpperCase() as 'ENTREGA' | 'RETIRADA', endereco, pagamento, observacoes, itens });
 
-  try {
-    // Monta o corpo do pedido para o backend
-    const body = {
-      nomeCliente: nome,
-      endereco: tipoEntrega === 'entrega' ? endereco : null,
-      tipoPedido: tipoEntrega,
-      formaPagamento: pagamento,
-      valorTotal: totalCarrinho,
-      observacoes,
-      itens: itens.map(item => ({
-        produtoId: item.id,
-        quantidade: item.quantidade,
-        preco: item.preco,
-        tamanho: item.tamanho || null,
-        massa: item.massa || null,
-        recheios: item.recheios || [],
-        cobertura: item.cobertura || null,
-        decoracoes: item.decoracoes || []
-      }))
-    };
-
-    // Salva o pedido no backend
-    const response = await fetch('/api/pedidos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    if (!response.ok) {
-      throw new Error('Erro ao salvar o pedido no servidor');
-    }
-
-    const pedidoSalvo = await response.json();
-
-    // Monta mensagem do WhatsApp
-    const mensagem = `
-🍰 *Novo Pedido BC Docearia* 🍰
-
-🙋 *Nome:* ${nome}
-💳 *Pagamento:* ${pagamento}
-🚚 *Tipo:* ${tipoEntrega === 'retirada' ? 'Retirada' : 'Entrega'}
-${tipoEntrega === 'entrega' ? `🏠 *Endereço:* ${endereco}` : ''}
-${observacoes ? `📝 *Observações:* ${observacoes}` : ''}
-
-📦 *Itens do Pedido:*
-${itens
-  .map(
-    item =>
-      `• ${item.nome}${item.tamanho ? ` (${item.tamanho})` : ''}
-${item.massa ? `   - Massa: ${item.massa}` : ''}
-${item.recheios?.length ? `   - Recheios: ${item.recheios.join(', ')}` : ''}
-${item.cobertura ? `   - Cobertura: ${item.cobertura}` : ''}
-${item.decoracoes?.length ? `   - Decorações: ${item.decoracoes.join(', ')}` : ''}
-   - Quantidade: ${item.quantidade}x`
-  )
-  .join('\n\n')}
-
-💵 *Total Geral: R$${totalCarrinho.toFixed(2)}*
-`;
-
-    // Abre WhatsApp
-    const telefoneLoja = '5518997433503';
-    const url = `https://api.whatsapp.com/send?phone=${telefoneLoja}&text=${encodeURIComponent(mensagem.replace(/\n/g, '%0A'))}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
-
-    // Limpa o carrinho após enviar
+  if (sucesso) {
     dispatch(limparCarrinho());
-
-  } catch (error) {
-    console.error('Erro ao finalizar pedido:', error);
-    alert('Ocorreu um erro ao finalizar o pedido. Tente novamente.');
-  } finally {
-    setLoading(false);
+    setNome(''); setPagamento(''); 
+    setTipoEntrega(''); 
+    setEndereco(''); 
+    setObservacoes('');
+    setTentouEnviar(false);
   }
 };
 
@@ -163,7 +85,7 @@ ${item.decoracoes?.length ? `   - Decorações: ${item.decoracoes.join(', ')}` :
         </p>
       </div>
 
-        {/* Produtos do carrinho */}
+      {/* Produtos do carrinho */}
       <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6 md:space-y-8">
         <div className="space-y-4 sm:space-y-4 md:space-y-6">
           {itens.map(item => (
@@ -196,9 +118,9 @@ ${item.decoracoes?.length ? `   - Decorações: ${item.decoracoes.join(', ')}` :
                   {/* Título e detalhes */}
                   <div>
                     <div className='flex justify-center sm:justify-start'>
-                        <h2 className="text-xl sm:text-xl md:text-2xl lg:text-3xl font-playfair font-bold text-white mb-2">
-                          {item.nome}
-                        </h2>
+                      <h2 className="text-xl sm:text-xl md:text-2xl lg:text-3xl font-playfair font-bold text-white mb-2">
+                        {item.nome}
+                      </h2>
                     </div>
                     <div className="space-y-1 sm:space-y-0 text-sm sm:text-md md:text-[16px] lg:text-lg">
                       <div className="flex items-center">
@@ -273,7 +195,6 @@ ${item.decoracoes?.length ? `   - Decorações: ${item.decoracoes.join(', ')}` :
                     className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2  rounded-xl ml-auto cursor-pointer  bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-red-500/30 font-medium"
                   >
                     <Trash2 className="w-4 h-4" />
-                     
                   </button>
                 </div>
               </div>
@@ -302,6 +223,8 @@ ${item.decoracoes?.length ? `   - Decorações: ${item.decoracoes.join(', ')}` :
             </button>
           </div>
         </div>
+
+
 
         {/* Formulário de finalização */}
         <div 
@@ -354,9 +277,9 @@ ${item.decoracoes?.length ? `   - Decorações: ${item.decoracoes.join(', ')}` :
                 }`}
               >
                 <option value="" className="bg-gray-800">Forma de pagamento *</option>
-                <option value="Dinheiro" className="bg-gray-800">💵 Dinheiro</option>
-                <option value="Cartão" className="bg-gray-800">💳 Cartão</option>
-                <option value="Pix" className="bg-gray-800">📱 Pix</option>
+                <option value="DINHEIRO" className="bg-gray-800">💵 Dinheiro</option>
+                <option value="CARTAO" className="bg-gray-800">💳 Cartão</option>
+                <option value="PIX" className="bg-gray-800">📱 Pix</option>
               </select>
             </div>
 
@@ -426,7 +349,6 @@ ${item.decoracoes?.length ? `   - Decorações: ${item.decoracoes.join(', ')}` :
               <>
                 Finalizar Pedido no WhatsApp 
                 <FontAwesomeIcon icon={faWhatsapp} size='lg'/>
-
               </>
             )}
           </button>

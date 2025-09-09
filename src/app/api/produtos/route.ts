@@ -45,7 +45,7 @@ export async function GET(request: Request) {
         }
       },
       orderBy: {
-        nome: 'asc'
+        id: 'asc'
       }
     })
 
