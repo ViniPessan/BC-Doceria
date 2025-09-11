@@ -1,19 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { ItemCarrinho } from '../../types/produto'
 
-export interface ItemCarrinho {
-  id: number;
-  produtoId: number;
-  nome: string;
-  tipo?: string;
-  imagem?: string;
-  quantidade: number;
-  tamanho?: string;
-  massa?: string;
-  recheios?: string[];
-  cobertura?: string;
-  decoracoes?: string[];
-  preco: number;
-}
 
 interface CarrinhoState {
   itens: ItemCarrinho[]
@@ -42,15 +29,12 @@ const carrinhoSlice = createSlice({
         state.itens[index] = action.payload
       }
     },
-
-
     aumentarQuantidade: (state, action: PayloadAction<number>) => {
       const item = state.itens.find(i => i.id === action.payload)
       if (item) {
         item.quantidade += 1
       }
     },
-
     diminuirQuantidade: (state, action: PayloadAction<number>) => {
       const item = state.itens.find(i => i.id === action.payload)
       if (item && item.quantidade > 1) {

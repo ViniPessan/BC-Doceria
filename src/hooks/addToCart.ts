@@ -8,12 +8,15 @@ export function useCarrinho() {
 
   const addToCart = (
     produto: Produto,
-    selecoes: SelecoesProduto,
+    selecoes: SelecoesProduto = {},
     quantidade: number,
-    precoTotal: number,
+    precoTotal?: number, // Opcional, será calculado se não fornecido
     allowMassas: boolean = false
   ) => {
-    const novoItem = criarItemCarrinho(produto, selecoes, quantidade, precoTotal, allowMassas);
+    // Para sobremesas e produtos simples, usar preço direto do produto se não fornecido
+    const precoFinal = precoTotal || (produto.preco || 0);
+    
+    const novoItem = criarItemCarrinho(produto, selecoes, quantidade, precoFinal, allowMassas);
     dispatch(adicionarItem(novoItem));
   };
 
