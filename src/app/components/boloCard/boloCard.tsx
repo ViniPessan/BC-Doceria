@@ -89,7 +89,17 @@ const validacao = useMemo(() => {
   try {
     addToCart(produto, selecoes, quantidade, precoTotal, allowMassas);
     showToast('Produto adicionado ao carrinho com sucesso! 🎉', 'success');
-  } catch (error) {
+    setSelecoes({
+    tamanhoId: undefined,
+    massaId: undefined,
+    recheios: [],
+    coberturas: [],
+    decoracoes: []
+  });
+  // Resetar quantidade também (se quiser)
+  setQuantidade(1);
+  
+} catch (error) {
     showToast('Erro ao adicionar produto ao carrinho', 'error');
   }
 };
@@ -219,7 +229,7 @@ const validacao = useMemo(() => {
                             key={itemId}
                             onClick={() => toggleFn(itemId)}
                             disabled={isDisabled}
-                            className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-full border-2 text-xs sm:text-sm lg:text-base font-medium transition-all duration-300 text-center cursor-pointer hover:scale-105 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
+                            className={`px-2 sm:px-4 py-1.5 sm:py-2 rounded-full border-2 text-[11px] sm:text-sm lg:text-base font-medium transition-all duration-300 text-center cursor-pointer hover:scale-105 transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
                               ${isSelected 
                                 ? "border-pink-400 bg-pink-400/20 text-pink-300 shadow-lg shadow-pink-500/20" 
                                 : "border-gray-600 text-gray-300 hover:border-pink-400/50 hover:text-pink-300 hover:bg-gray-800/50"

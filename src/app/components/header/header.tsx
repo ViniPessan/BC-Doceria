@@ -25,7 +25,7 @@ pathname === path
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-3">
-        <div className="flex flex-col items-center mb-1 sm:mb-5">
+        <div className="flex flex-col items-center mb-1 sm:mb-3">
           <img
             src="/logo1.png"
             alt="Logo"
@@ -37,7 +37,7 @@ pathname === path
         </div>
 
         <nav className="flex justify-center py-3 font-playfair">
-          <div className="flex flex-nowrap justify-center gap-2 min-[375px]:gap-3 min-[425px]:gap-4 min-[550px]:gap-7 min-[768px]:gap-10 min-[1024px]:gap-14 min-[1440px]:gap-16  w-full max-w-[320px]">
+          <div className="flex flex-nowrap justify-center gap-2 min-[375px]:gap-3 min-[425px]:gap-4 min-[550px]:gap-6 min-[768px]:gap-10 min-[1024px]:gap-14 min-[1440px]:gap-16  w-full max-w-[320px]">
             <Link href="/" className={`flex items-center gap-0.5 min-[550px]:gap-2 ${linkClass("/")}`}>
               <Cake className="w-3 min-[425px]:w-4 min-[768px]:w-5 " />
               Bolos

@@ -1,107 +1,47 @@
 'use client'
 
-import { useEffect, useState } from "react";
-import { Produto, ProdutoTamanho } from "@/types/produto";
-import { useCarrinho } from "@/hooks/addToCart";
-import { Toast } from "../components/toastCard/toastCard";
-import { useToast } from "@/hooks/useToast";
+import { useState, useEffect } from "react";
+import { Produto } from "@/types/produto";
+import { DocinhoCard } from "../components/docinhoCard/DocinhoCard";
+import { fetchProdutos } from "../services/produtoService";
 
 export default function DocinhosPage() {
   const [docinhos, setDocinhos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTamanhos, setSelectedTamanhos] = useState<{ [id: number]: ProdutoTamanho }>({});
 
-  const { addToCart } = useCarrinho();
-  const { toast, showToast, hideToast } = useToast();
-
-  // Busca os docinhos
   useEffect(() => {
-    async function fetchDocinhos() {
+    const carregarDocinhos = async () => {
       try {
-        const res = await fetch('/api/produtos?categoria=DOCINHOS');
-        const data: Produto[] = await res.json();
-        setDocinhos(data);
-
-        // Inicializa tamanhos selecionados
-        const inicial = data.reduce((acc, d) => {
-          if (d.tamanhos.length > 0) acc[d.id] = d.tamanhos[0];
-          return acc;
-        }, {} as { [id: number]: ProdutoTamanho });
-        setSelectedTamanhos(inicial);
-
-      } catch (error) {
-        console.error('Erro ao carregar docinhos:', error);
+        const produtos = await fetchProdutos("DOCINHOS");
+        setDocinhos(produtos);
+      } catch (err) {
+        console.error("Erro ao buscar docinhos:", err);
       } finally {
         setLoading(false);
       }
-    }
+    };
 
-    fetchDocinhos();
+    carregarDocinhos();
   }, []);
 
-  if (loading) return <p className="p-6">Carregando docinhos...</p>;
+  if (loading) return <p className="text-center mt-20 text-pink-300">Carregando docinhos...</p>;
 
   return (
-    <main className="p-6">
-      <h1 className="text-7xl md:text-8xl lg:text-9xl font-vibes text-transparent bg-gradient-to-r from-pink-200 via-pink-500 to-pink-700 bg-clip-text text-center pt-10 drop-shadow-[0_0_10px_#f4289157]">
-        Docinhos
-      </h1>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
-        {docinhos.map(docinho => (
-          <div key={docinho.id} className="bg-white shadow-lg rounded-xl overflow-hidden p-4 flex flex-col items-center">
-            <img
-              src={docinho.imagem || "/placeholder.jpg"}
-              alt={docinho.nome}
-              className="w-32 h-32 object-cover rounded-md mb-4"
-            />
-            <h3 className="text-lg font-bold mb-2">{docinho.nome}</h3>
-
-            <select
-              className="border rounded-md p-1 mb-2"
-              value={selectedTamanhos[docinho.id]?.id || 0}
-              onChange={(e) => {
-                const tamanho = docinho.tamanhos.find(t => t.id === Number(e.target.value));
-                if (tamanho) {
-                  setSelectedTamanhos(prev => ({ ...prev, [docinho.id]: tamanho }));
-                }
-              }}
-            >
-              {docinho.tamanhos.map(t => (
-                <option key={t.id} value={t.id}>
-                  {t.tamanho} - R$ {t.preco.toFixed(2)}
-                </option>
-              ))}
-            </select>
-
-            <button
-              className="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600 transition-colors"
-              onClick={() => {
-                const tamanhoSelecionado = selectedTamanhos[docinho.id];
-                if (!tamanhoSelecionado) return;
-
-                addToCart(
-                  docinho,                          // produto
-                  { tamanhoId: tamanhoSelecionado.id }, // seleções
-                  1,                                 // quantidade
-                  tamanhoSelecionado.preco            // preço total
-                );
-
-                showToast("Docinho adicionado ao carrinho!", "success");
-              }}
-            >
-              Adicionar ao carrinho
-            </button>
-          </div>
-        ))}
+    <main className="min-h-screen bg-black px-4 sm:px-6 pb-20">
+      <div className="text-center mb-12 pt-6">
+        <h1 className="text-7xl md:text-8xl lg:text-9xl font-vibes text-transparent bg-gradient-to-r from-pink-200 via-pink-500 to-pink-700 bg-clip-text pt-10 drop-shadow-[0_0_10px_#f4289157]">
+          Docinhos
+        </h1>
+        <p className="text-pink-200 text-lg sm:text-xl mt-4">
+          Pequenos momentos de felicidade em cada sabor
+        </p>
       </div>
 
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        show={toast.show}
-        onClose={hideToast}
-      />
+      <div className="max-w-md sm:max-w-7xl xl:max-w-[1400px] mx-auto grid grid-cols-1 min-[640px]:grid-cols-2 min-[980px]:grid-cols-3 min-[1280px]:grid-cols-4 gap-6 lg:gap-8">
+        {docinhos.map(docinho => (
+          <DocinhoCard key={docinho.id} docinho={docinho} />
+        ))}
+      </div>
     </main>
   );
 }

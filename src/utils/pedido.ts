@@ -24,12 +24,12 @@ export const montarMensagemWhatsApp = (
   const itensMensagem = itens.map(item => {
     let detalhes = `• *${item.nome}*`;
     if (item.tamanho) detalhes += ` (${item.tamanho})`;
-    if (item.massa) detalhes += `\n   └ Massa: ${item.massa}`;
-    if (item.recheios?.length) detalhes += `\n   └ Recheios: ${item.recheios.join(', ')}`;
-    if (item.cobertura) detalhes += `\n   └ Cobertura: ${item.cobertura}`;
-    if (item.decoracoes?.length) detalhes += `\n   └ Decorações: ${item.decoracoes.join(', ')}`;
-    detalhes += `\n   └ Quantidade: ${item.quantidade}x`;
-    detalhes += `\n   └ Subtotal: R$${(item.preco * item.quantidade).toFixed(2)}`;
+    if (item.massa) detalhes += `\n   - Massa: ${item.massa}`;
+    if (item.recheios?.length) detalhes += `\n   - Recheios: ${item.recheios.join(', ')}`;
+    if (item.cobertura) detalhes += `\n   - Cobertura: ${item.cobertura}`;
+    if (item.decoracoes?.length) detalhes += `\n   - Decorações: ${item.decoracoes.join(', ')}`;
+    detalhes += `\n   - Quantidade: ${item.quantidade}x`;
+    detalhes += `\n   - Subtotal: R$${(item.preco * item.quantidade).toFixed(2)}`;
     return detalhes;
   }).join('\n\n');
 
