@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Produto } from "@/types/produto";
 import { SobremesaCard } from "../components/sobremesaCard/SobremesaCard";
-import { fetchProdutos } from "../services/produtoService";
+import { fetchProdutos } from "../../services/produtoService";
 
 export default function SobremesasPage() {
   const [sobremesas, setSobremesas] = useState<Produto[]>([]);

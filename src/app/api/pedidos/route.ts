@@ -2,6 +2,37 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { FormaPagamento, TipoPedido, StatusPedido } from "@prisma/client";
 
+// Função para transformar pedido em formato limpo
+function transformarPedido(pedido: any) {
+  return {
+    id: pedido.id,
+    nomeCliente: pedido.nomeCliente,
+    telefone: pedido.telefone,
+    endereco: pedido.endereco,
+    tipoPedido: pedido.tipoPedido,
+    formaPagamento: pedido.formaPagamento,
+    valorTotal: pedido.valorTotal,
+    status: pedido.status,
+    observacoes: pedido.observacoes,
+    createdAt: pedido.createdAt,
+    updatedAt: pedido.updatedAt,
+    itens: pedido.itens.map((item: any) => ({
+      id: item.id,
+      produtoId: item.produtoId,
+      nomeProduto: item.produto.nome,        // ← Nome direto no item
+      categoria: item.produto.categoria,
+      imagem: item.produto.imagem,
+      quantidade: item.quantidade,
+      preco: item.preco,
+      tamanho: item.tamanho,
+      massa: item.massa,
+      recheios: item.recheios,
+      cobertura: item.cobertura,
+      decoracoes: item.decoracoes
+    }))
+  };
+}
+
 // Criar novo pedido
 export async function POST(req: NextRequest) {
   try {
@@ -74,13 +105,22 @@ export async function POST(req: NextRequest) {
       include: {
         itens: {
           include: {
-            produto: true
+            produto: {
+              select: {
+                id: true,
+                nome: true,
+                categoria: true,
+                imagem: true
+              }
+            }
           }
         }
       }
     });
 
-    return NextResponse.json(novoPedido, { status: 201 });
+    // Retornar pedido transformado
+    const pedidoLimpo = transformarPedido(novoPedido);
+    return NextResponse.json(pedidoLimpo, { status: 201 });
 
   } catch (error) {
     console.error("Erro ao criar pedido:", error);
@@ -104,7 +144,14 @@ export async function GET(req: NextRequest) {
       include: {
         itens: {
           include: {
-            produto: true
+            produto: {
+              select: {
+                id: true,
+                nome: true,
+                categoria: true,
+                imagem: true
+              }
+            }
           }
         }
       },
@@ -113,7 +160,9 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    return NextResponse.json(pedidos);
+    // Transformar todos os pedidos
+    const pedidosLimpos = pedidos.map(transformarPedido);
+    return NextResponse.json(pedidosLimpos);
 
   } catch (error) {
     console.error("Erro ao buscar pedidos:", error);

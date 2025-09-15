@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Produto } from "@/types/produto";
 import { DocinhoCard } from "../components/docinhoCard/DocinhoCard";
-import { fetchProdutos } from "../services/produtoService";
+import { fetchProdutos } from "../../services/produtoService";
 
 export default function DocinhosPage() {
   const [docinhos, setDocinhos] = useState<Produto[]>([]);

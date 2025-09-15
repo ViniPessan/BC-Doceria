@@ -110,7 +110,7 @@ async function main() {
   const boloAniversario = await prisma.produto.create({
     data: {
       nome: 'Bolo de Aniversário',
-      descricao: 'Bolo personalizado com massa à escolha, 2 recheios e 1 cobertura',
+      descricao: 'Bolo personalizado com 2 recheios, 1 cobertura e até 4 decorações à escolha',
       categoria: 'BOLO_ANIVERSARIO',
       imagem: "/bolos/aniversario.jpg",
       ativo: true,

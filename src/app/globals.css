@@ -16,3 +16,21 @@ body{
   background-color: black;
 }
 
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: #f472b6 #1f2937; /* thumb cor / track cor */
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background-color: #f472b6;
+  border-radius: 10px;
+  border: 2px solid #1f2937;
+}

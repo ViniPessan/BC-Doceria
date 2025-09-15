@@ -2,7 +2,7 @@
 import { BoloCard } from "../boloCard/boloCard";
 import { useState, useEffect } from "react";
 import { SelecoesProduto, Produto } from "@/types/produto";
-import { fetchProdutos } from "../../services/produtoService";
+import { fetchProdutos } from "../../../services/produtoService";
 
 export const CupCake = () => {
   const [selecoes, setSelecoes] = useState<SelecoesProduto>({});
