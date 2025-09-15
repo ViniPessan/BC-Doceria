@@ -139,7 +139,7 @@ export const BoloCard: React.FC<BoloCardProps> = ({
             </div>
 
             {/* DIREITA - opções de personalização */}
-            <div className="p-2 sm:p-3 lg:p-4 space-y-2 sm:space-y-3 md:overflow-y-auto md:max-h-[400px] lg:max-h-[470px] scrollbar-custom">
+            <div className="p-2 sm:p-3 lg:p-4 space-y-2 sm:space-y-3 md:overflow-y-auto md:max-h-[460px] lg:max-h-[520px] scrollbar-custom">
               <div className="space-y-2 sm:space-y-3">
                 {/* tamanhos */}
                 {produto.tamanhos.length > 0 && (
