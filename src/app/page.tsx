@@ -13,7 +13,7 @@ export default function Home() {
     // Simula um tempo de carregamento inicial
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1000);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
