@@ -26,7 +26,7 @@ export default function DocinhosPage() {
   }, []);
 
 if (loading) {
-return <Loading message="Carregando sobremesas..." />;
+return <Loading message="Carregando docinhos..." />;
 }
 
   return (

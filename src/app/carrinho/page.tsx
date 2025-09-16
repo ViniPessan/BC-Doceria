@@ -3,18 +3,20 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import { removerItem, aumentarQuantidade, diminuirQuantidade, limparCarrinho } from '@/store/slices/carrinhoSlice';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import { usePedido } from '@/hooks/usePedido';
+import { Loading } from '../components/loading/Loading';
+
 
 
 
 export default function CarrinhoPage() {
   const itens = useSelector((state: RootState) => state.carrinho.itens);
   const dispatch = useDispatch();
-
+  const [isLoading, setIsLoading] = useState(true)
   const [nome, setNome] = useState('');
   const [pagamento, setPagamento] = useState('');
   const [tipoEntrega, setTipoEntrega] = useState<'retirada' | 'entrega' | ''>('');
@@ -23,6 +25,18 @@ export default function CarrinhoPage() {
   const [erros, setErros] = useState({nome: false,pagamento: false,tipoEntrega: false,endereco: false});
   const [tentouEnviar, setTentouEnviar] = useState(false);
   const { enviarPedido, loading, erro } = usePedido();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return <Loading message="Carregando carrinho..." />;
+  }
 
 
   if (!itens || itens.length === 0) {
