@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/useToast";
 import { getTipoBolo, TipoBolo } from '@/utils/tipoBolo';
 import { validarSelecoes } from "@/utils/validacoesBolo";
 import { QuantidadeTotal } from "../quantidadeTotal/QuantidadeTotal";
+import Image from "next/image";
 
 interface BoloCardProps {
   produto: Produto;
@@ -115,9 +116,11 @@ export const BoloCard: React.FC<BoloCardProps> = ({
             {/* ESQUERDA - imagem + título/descrição */}
             <div className="flex flex-col">
               <div className="relative overflow-hidden">
-                <img 
+                <Image 
                   src={produto.imagem || "/placeholder.png"} 
                   alt={produto.nome} 
+                  width={600}
+                  height={400}
                   className="w-full h-auto sm:h-auto md:h-64 lg:h-80 rounded-2xl object-cover transition-transform duration-700 hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
