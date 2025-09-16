@@ -69,11 +69,7 @@ export const usePedido = () => {
       );
 
       // Abre WhatsApp
-      window.open(
-        `https://api.whatsapp.com/send?phone=${telefoneLoja}&text=${encodeURIComponent(mensagem)}`,
-        '_blank',
-        'noopener,noreferrer'
-      );
+      window.location.href = `https://wa.me/${telefoneLoja}?text=${encodeURIComponent(mensagem)}`;
 
       return true;
     } catch (err) {
