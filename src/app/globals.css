@@ -12,13 +12,33 @@
   --font-vibes: var(--font-vibes)
 }
 
-body{
+/* Previne o overscroll bounce */
+html, body {
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
   background-color: black;
 }
 
+body{
+  background-color: black;
+  /* Garante que não haja espaço em branco */
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  min-height: 100dvh; /* Para dispositivos móveis */
+}
+
+/* Específico para iOS Safari */
+body {
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbar styles */
 .scrollbar-custom {
   scrollbar-width: thin;
-  scrollbar-color: #f472b6 #1f2937; /* thumb cor / track cor */
+  scrollbar-color: #f472b6 #1f2937;
 }
 
 .scrollbar-custom::-webkit-scrollbar {
