@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Produto } from "@/types/produto";
 import { DocinhoCard } from "../components/docinhoCard/DocinhoCard";
 import { fetchProdutos } from "../../services/produtoService";
+import { Loading } from "../components/loading/Loading";
 
 export default function DocinhosPage() {
   const [docinhos, setDocinhos] = useState<Produto[]>([]);
@@ -24,7 +25,9 @@ export default function DocinhosPage() {
     carregarDocinhos();
   }, []);
 
-  if (loading) return <p className="text-center mt-20 text-pink-300">Carregando docinhos...</p>;
+if (loading) {
+return <Loading message="Carregando sobremesas..." />;
+}
 
   return (
     <main className="min-h-screen bg-black px-4 sm:px-6 pb-20">

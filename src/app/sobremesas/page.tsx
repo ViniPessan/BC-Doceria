@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Produto } from "@/types/produto";
 import { SobremesaCard } from "../components/sobremesaCard/SobremesaCard";
 import { fetchProdutos } from "../../services/produtoService";
+import {Loading} from "../components/loading/Loading";
 
 export default function SobremesasPage() {
   const [sobremesas, setSobremesas] = useState<Produto[]>([]);
@@ -25,15 +26,8 @@ export default function SobremesasPage() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center px-4">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-pink-400 mx-auto"></div>
-          <p className="text-pink-300 text-xl">Carregando sobremesas...</p>
-        </div>
-      </div>
-    );
-  }
+  return <Loading message="Carregando sobremesas..." />;
+}
 
   return (
     <main className="min-h-screen bg-black px-4 sm:px-6 pb-20">

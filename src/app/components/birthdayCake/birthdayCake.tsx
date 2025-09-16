@@ -24,7 +24,7 @@ export const BirthdayCake = () => {
   const handleAddToCart = (item: any) => {
     console.log("Item adicionado ao carrinho:", item);
   };
-
+  
   if (!produto) return <p>Carregando...</p>;
 
   return (

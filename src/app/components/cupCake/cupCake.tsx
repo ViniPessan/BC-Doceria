@@ -23,8 +23,9 @@ export const CupCake = () => {
   const handleAddToCart = (item: any) => {
     console.log("Item adicionado ao carrinho:", item);
   };
+  
 
-  if (!produto) return <p>Carregando...</p>;
+  if (!produto) return null;
 
   return (
     <BoloCard

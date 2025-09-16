@@ -33,7 +33,7 @@ export const HomeCake = () => {
     return match ? parseInt(match[0]) : 0;
   };
 
-  if (!produto) return <p>Carregando...</p>;
+    if (!produto) return <p>Carregando...</p>;
 
   return (
     <BoloCard

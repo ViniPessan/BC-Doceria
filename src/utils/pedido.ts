@@ -45,7 +45,7 @@ ${observacoes ? `📝 *Observações:* ${observacoes}` : ''}
 📦 *Itens do Pedido:*
 ${itensMensagem}
 
-💵 *Total Geral: R$${total.toFixed(2)}*
+💵 *Total: R$${total.toFixed(2)}*
   `.trim();
 };
 
