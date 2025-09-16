@@ -157,7 +157,7 @@ async function main() {
     { nome: 'Brigadeiro', imagem: '/docinhos/brigadeiro.jpg', precoExtra: 0 },
     { nome: 'Ninho com Nutella', imagem: '/docinhos/ninho-nutella.jpg', precoExtra: 30 },
     { nome: 'Beijinho', imagem: '/docinhos/beijinho.jpg', precoExtra: 0 },
-    { nome: 'Ninho', imagem: '/docinhos/ninho.jpg', precoExtra: 0 },
+    { nome: 'Ninho', imagem: '/docinhos/Ninho.jpg', precoExtra: 0 },
     { nome: 'Brigadeiro de Paçoca', imagem: '/docinhos/brigadeiro-pacoca.jpg', precoExtra: 0 },
     { nome: 'Brigadeiro de Churros', imagem: '/docinhos/brigadeiro-churros.jpg', precoExtra: 0 },
     { nome: 'Brigadeiro de Morango', imagem: '/docinhos/brigadeiro-morango.webp', precoExtra: 0 },
