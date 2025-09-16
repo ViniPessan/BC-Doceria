@@ -5,21 +5,47 @@ import { CupCake } from "./components/cupCake/cupCake";
 import { HomeCake } from "./components/homeCake/homeCake";
 import { useState, useEffect } from "react";
 import { Loading } from "./components/loading/Loading";
+import { fetchProdutos } from "../services/produtoService";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Carregando bolos...");
 
   useEffect(() => {
-    // Simula um tempo de carregamento inicial
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 9000);
+    const preCarregarTodosProdutos = async () => {
+      try {
+        setLoadingMessage("Carregando produtos...");
+        
+        // Pré-carrega todos os produtos antes de renderizar os componentes
+        await Promise.all([
+          fetchProdutos("BOLO_TACA"),
+          fetchProdutos("BOLO_ANIVERSARIO"), 
+          fetchProdutos("BOLO_CASEIRO")
+        ]);
 
-    return () => clearTimeout(timer);
+        setLoadingMessage("Preparando interface...");
+        
+        // Pequena pausa para garantir que tudo está pronto
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 500);
+        
+      } catch (err) {
+        console.error("Erro ao pré-carregar produtos:", err);
+        setLoadingMessage("Erro ao carregar. Tentando novamente...");
+        
+        // Tenta novamente após erro
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 1000);
+      }
+    };
+
+    preCarregarTodosProdutos();
   }, []);
 
   if (isLoading) {
-    return <Loading message="Carregando bolos..." />;
+    return <Loading message={loadingMessage} />;
   }
 
   return (
