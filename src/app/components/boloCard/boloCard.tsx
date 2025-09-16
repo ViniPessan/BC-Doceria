@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ShoppingCart } from "lucide-react";
 import { Produto, SelecoesProduto, ItemCarrinhoData } from "@/types/produto/";
 import { calcularPreco } from '@/utils/preco';
@@ -32,41 +32,38 @@ export const BoloCard: React.FC<BoloCardProps> = ({
   maxDecoracoes = 0,
   allowMassas = false
 }) => {
+  const [precoTotal, setPrecoTotal] = useState<number>(produto.preco || 0);
   const [quantidade, setQuantidade] = useState<number>(1);
   const { toast, showToast, hideToast } = useToast();
   const { addToCart } = useCarrinho();
 
-  // Memoizar o tipo do bolo (só recalcula se produto.nome mudar)
-  const tipoBolo: TipoBolo = useMemo(() => getTipoBolo(produto.nome), [produto.nome]);
+  useEffect(() => {
+    setPrecoTotal(calcularPreco(produto, selecoes, allowMassas));
+  }, [selecoes, produto, allowMassas]);
 
-  // Memoizar o cálculo do preço total
-  const precoTotal = useMemo(() => {
-    return calcularPreco(produto, selecoes, allowMassas);
-  }, [produto, selecoes, allowMassas]);
+  const tipoBolo: TipoBolo = getTipoBolo(produto.nome);
 
-  // Memoizar as funções de toggle para evitar re-criação desnecessária
-  const toggleRecheio = useCallback((id: number) => {
+  const toggleRecheio = (id: number) => {
     setSelecoes(prev => ({
       ...prev,
       recheios: toggleItem(id, prev.recheios, maxRecheios)
     }));
-  }, [maxRecheios, setSelecoes]);
+  };
 
-  const toggleCobertura = useCallback((id: number) => {
+  const toggleCobertura = (id: number) => {
     setSelecoes(prev => ({
       ...prev,
       coberturas: toggleItem(id, prev.coberturas, maxCoberturas)
     }));
-  }, [maxCoberturas, setSelecoes]);
+  };
 
-  const toggleDecoracao = useCallback((id: number) => {
+  const toggleDecoracao = (id: number) => {
     setSelecoes(prev => ({
       ...prev,
       decoracoes: toggleItem(id, prev.decoracoes, maxDecoracoes)
     }));
-  }, [maxDecoracoes, setSelecoes]);
+  };
 
-  // Memoizar a validação
   const validacao = useMemo(() => {
     return validarSelecoes({
       selecoes,
@@ -78,76 +75,7 @@ export const BoloCard: React.FC<BoloCardProps> = ({
     });
   }, [selecoes, tipoBolo, maxRecheios, maxCoberturas, maxDecoracoes, allowMassas]);
 
-  // Memoizar as seções de customização para evitar re-render desnecessário
-  const secoesMemoized = useMemo(() => {
-    return ['recheios', 'coberturas', 'decoracoes'].map((sec) => {
-      const itens = produto[sec as keyof Produto] as any[];
-      const max = sec === 'recheios' ? maxRecheios : sec === 'coberturas' ? maxCoberturas : maxDecoracoes;
-      const toggleFn = sec === 'recheios' ? toggleRecheio : sec === 'coberturas' ? toggleCobertura : toggleDecoracao;
-      const selecionados = selecoes[sec as keyof SelecoesProduto] as number[] | undefined;
-
-      if (!itens?.length || max === 0) return null;
-
-      return {
-        key: sec,
-        titulo: sec.charAt(0).toUpperCase() + sec.slice(1),
-        itens,
-        max,
-        toggleFn,
-        selecionados,
-        isRequired: ['taca', 'aniversario'].includes(tipoBolo) && (sec !== 'decoracoes')
-      };
-    }).filter(Boolean);
-  }, [produto, maxRecheios, maxCoberturas, maxDecoracoes, toggleRecheio, toggleCobertura, toggleDecoracao, selecoes, tipoBolo]);
-
-  // Memoizar os tamanhos renderizados
-  const tamanhosRenderizados = useMemo(() => {
-    if (!produto.tamanhos.length) return null;
-
-    return produto.tamanhos.map(t => (
-      <button
-        key={t.id}
-        onClick={() => setSelecoes({ ...selecoes, tamanhoId: t.id })}
-        className={`p-2 sm:px-3 sm:py-2 md:py-1 rounded-lg border-2 text-xs sm:text-sm md:text-base font-medium transition-all duration-300 cursor-pointer hover:scale-[1.02]
-          ${selecoes.tamanhoId === t.id 
-            ? "border-pink-400 bg-pink-400/10 text-pink-300 shadow-lg shadow-pink-500/20" 
-            : "border-gray-600 text-gray-300 hover:border-pink-400/50 hover:text-pink-300 hover:bg-gray-800/50"
-          }`}
-      >
-        <div className="flex justify-between items-center">
-          <span className="truncate">{t.tamanho}</span>
-          <div className="text-right ml-2 flex-shrink-0">
-            <div className="text-pink-300 font-bold">R${t.preco.toFixed(2)}</div>
-            {t.fatias && <div className="text-xs text-gray-400">{t.fatias} fatias</div>}
-          </div>
-        </div>
-      </button>
-    ));
-  }, [produto.tamanhos, selecoes.tamanhoId, setSelecoes, selecoes]);
-
-  // Memoizar as massas renderizadas
-  const massasRenderizadas = useMemo(() => {
-    if (!allowMassas || !produto.massas.length) return null;
-
-    return produto.massas.map(m => (
-      <button
-        key={m.id}
-        onClick={() => setSelecoes({ ...selecoes, massaId: m.id })}
-        className={`px-2 sm:px-4 py-2 md:py-1 lg:py-2 rounded-full border-2 text-xs sm:text-sm md:text-base font-medium transition-all duration-300 cursor-pointer hover:scale-105
-          ${selecoes.massaId === m.id 
-            ? "border-pink-400 bg-pink-400/10 text-pink-300 shadow-lg shadow-pink-500/20" 
-            : "border-gray-600 text-gray-300 hover:border-pink-400/50 hover:text-pink-300 hover:bg-gray-800/50"
-          }`}
-      >
-        <div className="truncate">
-          {m.massa.nome}
-          {m.massa.precoExtra > 0 && <span className="block sm:inline text-xs text-pink-300 sm:ml-1">+R${m.massa.precoExtra.toFixed(2)}</span>}
-        </div>
-      </button>
-    ));
-  }, [allowMassas, produto.massas, selecoes.massaId, setSelecoes, selecoes]);
-
-  const handleAddToCart = useCallback(() => {
+  const handleAddToCart = () => {
     if (!validacao.valido) {
       showToast(validacao.mensagem, 'error');
       return;
@@ -167,7 +95,7 @@ export const BoloCard: React.FC<BoloCardProps> = ({
     } catch (error) {
       showToast('Erro ao adicionar produto ao carrinho', 'error');
     }
-  }, [validacao, showToast, addToCart, produto, selecoes, quantidade, precoTotal, allowMassas, setSelecoes]);
+  };
 
   return (
     <>
@@ -190,7 +118,6 @@ export const BoloCard: React.FC<BoloCardProps> = ({
                 <img 
                   src={produto.imagem || "/placeholder.png"} 
                   alt={produto.nome} 
-                  loading="lazy"
                   className="w-full h-auto sm:h-auto md:h-64 lg:h-80 rounded-2xl object-cover transition-transform duration-700 hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -214,7 +141,6 @@ export const BoloCard: React.FC<BoloCardProps> = ({
             {/* DIREITA - opções de personalização */}
             <div className="p-2 sm:p-3 lg:p-4 space-y-2 sm:space-y-3 md:overflow-y-auto md:max-h-[460px] lg:max-h-[520px] scrollbar-custom">
               <div className="space-y-2 sm:space-y-3">
-                
                 {/* tamanhos */}
                 {produto.tamanhos.length > 0 && (
                   <div>
@@ -223,7 +149,25 @@ export const BoloCard: React.FC<BoloCardProps> = ({
                       Tamanhos <span className="text-red-400 ml-1">*</span>
                     </h3>
                     <div className="grid grid-cols-1 gap-2">
-                      {tamanhosRenderizados}
+                      {produto.tamanhos.map(t => (
+                        <button
+                          key={t.id}
+                          onClick={() => setSelecoes({ ...selecoes, tamanhoId: t.id })}
+                          className={`p-2 sm:px-3 sm:py-2 md:py-1 rounded-lg border-2 text-xs sm:text-sm md:text-base font-medium transition-all duration-300 cursor-pointer hover:scale-[1.02]
+                            ${selecoes.tamanhoId === t.id 
+                              ? "border-pink-400 bg-pink-400/10 text-pink-300 shadow-lg shadow-pink-500/20" 
+                              : "border-gray-600 text-gray-300 hover:border-pink-400/50 hover:text-pink-300 hover:bg-gray-800/50"
+                            }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="truncate">{t.tamanho}</span>
+                            <div className="text-right ml-2 flex-shrink-0">
+                              <div className="text-pink-300 font-bold">R${t.preco.toFixed(2)}</div>
+                              {t.fatias && <div className="text-xs text-gray-400">{t.fatias} fatias</div>}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -236,30 +180,48 @@ export const BoloCard: React.FC<BoloCardProps> = ({
                       Massas {getTipoBolo(produto.nome) === 'caseiro' && <span className="text-red-400 ml-1">*</span>}
                     </h3>
                     <div className="flex flex-wrap gap-1 sm:gap-2">
-                      {massasRenderizadas}
+                      {produto.massas.map(m => (
+                        <button
+                          key={m.id}
+                          onClick={() => setSelecoes({ ...selecoes, massaId: m.id })}
+                          className={`px-2 sm:px-4 py-2 md:py-1 lg:py-2 rounded-full border-2 text-xs sm:text-sm md:text-base font-medium transition-all duration-300 cursor-pointer hover:scale-105
+                            ${selecoes.massaId === m.id 
+                              ? "border-pink-400 bg-pink-400/10 text-pink-300 shadow-lg shadow-pink-500/20" 
+                              : "border-gray-600 text-gray-300 hover:border-pink-400/50 hover:text-pink-300 hover:bg-gray-800/50"
+                            }`}
+                        >
+                          <div className="truncate">
+                            {m.massa.nome}
+                            {m.massa.precoExtra > 0 && <span className="block sm:inline text-xs text-pink-300 sm:ml-1">+R${m.massa.precoExtra.toFixed(2)}</span>}
+                          </div>
+                        </button>
+                      ))}
                     </div>
                   </div>
                 )}
 
-                {/* recheios/coberturas/decorações - usando versão memoizada */}
-                {secoesMemoized.map((secao) => {
-                  if (!secao) return null;
-                  
-                  const { key, titulo, itens, max, toggleFn, selecionados, isRequired } = secao;
+                {/* recheios/coberturas/decorações */}
+                {['recheios', 'coberturas', 'decoracoes'].map((sec) => {
+                  const itens = produto[sec as keyof Produto] as any[];
+                  const max = sec === 'recheios' ? maxRecheios : sec === 'coberturas' ? maxCoberturas : maxDecoracoes;
+                  const toggleFn = sec === 'recheios' ? toggleRecheio : sec === 'coberturas' ? toggleCobertura : toggleDecoracao;
+                  const selecionados = selecoes[sec as keyof SelecoesProduto] as number[] | undefined;
+
+                  if (!itens?.length || max === 0) return null;
 
                   return (
-                    <div key={key}>
+                    <div key={sec}>
                       <h3 className="text-pink-400 font-semibold mb-2 sm:mb-3 flex items-center text-sm sm:text-base lg:text-lg">
                         <span className="w-2 h-2 bg-pink-400 rounded-full mr-2"></span>
-                        {titulo}
+                        {sec.charAt(0).toUpperCase() + sec.slice(1)}
                         <span className="text-xs text-gray-400 ml-2">({selecionados?.length || 0}/{max})</span>
-                        {isRequired && <span className="text-red-400 ml-1">*</span>}
+                        {(['taca', 'aniversario'].includes(tipoBolo) && (sec !== 'decoracoes')) && <span className="text-red-400 ml-1">*</span>}
                       </h3>
                       <div className="flex flex-wrap gap-1 sm:gap-2">
                         {itens.map(item => {
                           const itemId = item.id;
-                          const nome = item[key === 'decoracoes' ? 'decoracao' : key.slice(0, -1)].nome;
-                          const precoExtra = item[key === 'decoracoes' ? 'decoracao' : key.slice(0, -1)].preco || item.precoExtra || 0;
+                          const nome = item[sec === 'decoracoes' ? 'decoracao' : sec.slice(0, -1)].nome;
+                          const precoExtra = item[sec === 'decoracoes' ? 'decoracao' : sec.slice(0, -1)].preco || item.precoExtra || 0;
                           const isSelected = selecionados?.includes(itemId);
                           const isDisabled = !isSelected && (selecionados?.length || 0) >= max;
 
